@@ -1,0 +1,85 @@
+name: Publish AIRLIFT
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'godot/**'
+      - '.github/workflows/pages.yml'
+permissions:
+  contents: read
+concurrency:
+  group: github-pages
+  cancel-in-progress: false
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      GODOT_VERSION: '4.7.2'
+    steps:
+      - uses: actions/checkout@v6
+      - name: Install matching Godot editor and Web templates
+        shell: bash
+        run: |
+          set -euo pipefail
+          release="${GODOT_VERSION}-stable"
+          base="https://github.com/godotengine/godot-builds/releases/download/${release}"
+          editor="Godot_v${release}_linux.x86_64.zip"
+          templates="Godot_v${release}_export_templates.tpz"
+          cd "$RUNNER_TEMP"
+          curl -fLsS --retry 3 "$base/$editor" -o "$editor"
+          curl -fLsS --retry 3 "$base/$templates" -o "$templates"
+          curl -fLsS --retry 3 "$base/SHA512-SUMS.txt" -o SHA512-SUMS.txt
+          python3 - "$editor" "$templates" <<'PY'
+          import hashlib, pathlib, sys
+          sums={line.split()[-1].lstrip('*'):line.split()[0] for line in pathlib.Path('SHA512-SUMS.txt').read_text().splitlines() if line.strip()}
+          for name in sys.argv[1:]:
+              actual=hashlib.file_digest(open(name,'rb'),'sha512').hexdigest()
+              if actual != sums.get(name): raise SystemExit('Checksum mismatch: '+name)
+          PY
+          unzip -q "$editor" -d godot-bin
+          chmod +x "godot-bin/Godot_v${release}_linux.x86_64"
+          ln -s "$RUNNER_TEMP/godot-bin/Godot_v${release}_linux.x86_64" "$RUNNER_TEMP/godot-bin/godot"
+          echo "$RUNNER_TEMP/godot-bin" >> "$GITHUB_PATH"
+          python3 - "$templates" "$GODOT_VERSION" <<'PY'
+          import pathlib, sys, zipfile
+          target=pathlib.Path.home()/'.local/share/godot/export_templates'/f'{sys.argv[2]}.stable'
+          target.mkdir(parents=True,exist_ok=True)
+          with zipfile.ZipFile(sys.argv[1]) as archive:
+              for member in archive.namelist():
+                  name=pathlib.PurePosixPath(member).name
+                  if name.startswith('web_') and name.endswith('.zip') or name=='version.txt':
+                      (target/name).write_bytes(archive.read(member))
+          PY
+      - name: Import assets and run checks
+        run: |
+          set -euo pipefail
+          godot --headless --path godot --editor --import --quit
+          for suite in scene rescue animation flight; do
+            godot --headless --path godot --script "Tests/test_${suite}.gd" 2>&1 | tee "$RUNNER_TEMP/test-${suite}.log"
+            if grep -Eq 'SCRIPT ERROR|Parse Error|ERROR:' "$RUNNER_TEMP/test-${suite}.log"; then exit 1; fi
+          done
+      - name: Export browser game
+        run: |
+          mkdir -p godot/builds/web
+          godot --headless --path godot --export-release Web builds/web/index.html
+          python3 godot/Tools/package_web.py
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: godot/builds/site
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/configure-pages@v5
+      - name: Deploy game
+        id: deployment
+        uses: actions/deploy-pages@v4

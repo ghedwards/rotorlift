@@ -1,71 +1,23 @@
 # AIRLIFT — Search & Rescue
 
-A 2.5D side-scrolling helicopter rescue game built with React, Vite, TypeScript and a hand-drawn Canvas renderer. Fly three scenarios, lower the winch onto stranded survivors, avoid trees, radio towers, power lines and wildfire, then bring everyone home to the base helipad.
+A Godot 4.7.2 / GDScript helicopter rescue game with three extended missions, momentum flight, wind, timed winch rescues and playable ground rescues.
 
-## Run it
+## Play with friends
 
-```bash
-npm install
-npm run dev      # http://localhost:5173
-npm run build    # outputs a self-contained dist/index.html
-npm run preview  # serve the production build
-```
+Browser release: **https://ghedwards.github.io/rotorlift/** (available once the Pages deployment succeeds).
 
-## Share it
+Open it on a computer or a phone held in landscape. Computers use WASD/arrows and Space; phones use the on-screen controls. The info icon opens the flight manual; the cog contains sound, mission selection and independent difficulty assists. A browser supporting WebGL 2 and WebAssembly is required. Real iPhone/Android device testing is still needed; desktop and emulated landscape-phone checks have passed.
 
-```bash
-node scripts/inline-assets.mjs   # produces airlift.html
-```
+## Run locally
 
-`airlift.html` is the entire game — code, styles and all three backdrop paintings base64-inlined — in one 751 KB file. Double-click it and it plays from `file://`, no server, no build step, no assets folder. Upload that single file to Netlify Drop, Cloudflare Pages, GitHub Pages or itch.io and you have a public link in under a minute.
+Import `godot/project.godot` into **Godot 4.7.2 standard** and press F5. No .NET is needed. See [the game guide](godot/README.md) for mechanics and headless tests.
 
-`dist/` is the conventional build (`index.html` + `images/`) if you would rather host the folder and keep the full-resolution art.
+## Publish updates
 
-## Controls
+The [Pages workflow](.github/workflows/pages.yml) builds and tests the Godot game on pushes to `main`, or through **Actions → Publish AIRLIFT → Run workflow**. It pins the engine version, verifies release checksums, exports without threading, bundles license notices and deploys only the web files. See [sharing and deployment](godot/SHARING.md).
 
-| Action | Keyboard | On screen |
-| --- | --- | --- |
-| Steer left / right | `A` `D` or `←` `→` | Steer buttons |
-| Throttle (climb) | hold `W` or `↑` | Throttle button |
-| Descend faster | hold `S` or `↓` | — |
-| Winch | `Space` or `E` | Deploy winch button |
-| Pause / resume | `P` or `Esc` | Scene button |
+## Artwork and animation
 
-While the winch is deployed, hover assist holds your altitude. Fly over an orange beacon and the hook catches the survivor automatically; the winch then reels in and stows.
+Static artwork and animated character atlases are editable SVGs in `godot/Assets/Art`. UI icons are bundled from Lucide with their source revision and license in `godot/Assets/Icons`. The gameplay geometry, rotors, rope and effects remain dynamic.
 
-## Missions
-
-1. **Pine Ridge** — North Cascades, light wind, trees and two radio towers.
-2. **Storm Coast** — Pacific Northwest, strong crosswinds that drift the aircraft, tall towers with live power lines.
-3. **Ember Valley** — Sierra Nevada, drifting ash, updrafts and wall-of-flame hazards.
-
-Each mission tracks fuel, airframe integrity (three hits), flight time and rescued count. Land on the base helipad to refuel; rescue all three survivors and return to base to complete the operation. Completed missions are remembered in `localStorage`.
-
-## Source layout
-
-```
-src/
-  App.tsx            page shell, HUD, flight deck, dialogs
-  index.css          full visual system and responsive breakpoints
-  game/engine.ts     game loop, physics, winch, collisions, Canvas rendering
-  game/scenarios.ts  terrain, survivors and hazards for the three missions
-  game/audio.ts      Web Audio rotor bed and event cues
-public/
-  images/*.png       parallax backdrop art per scenario
-  favicon.svg
-tests/rescue.spec.ts Playwright gameplay, control and layout tests
-playwright.config.ts
-```
-
-## Optional tests
-
-```bash
-npx playwright install chromium
-npx playwright test
-```
-
-The tests drive a real browser: keyboard and touch input, an automated rescue-and-return flight for each mission, collision damage and failure states, mission switching, dialogs, sound toggling and phone-layout overflow. They are not needed to run or build the game.
-
-## Godot edition
-
-The new GDScript port lives in [`godot/`](godot/README.md) and targets **Godot 4.7.2 stable**. Open `godot/project.godot` in the standard Godot editor and press F5. It includes all three rescue missions, keyboard and on-screen controls, winch rescues, fuel, airframe damage, saved progress and a browser export preset. See the Godot README for controls, verification and export instructions.
+The earlier React/Canvas prototype remains in `src/` and `airlift.html`; its [original instructions](docs/html-prototype.md) are retained for reference. The Pages workflow deploys the Godot edition.
