@@ -49,6 +49,7 @@ func _ready() -> void:
 	if settings.load("user://assists.cfg")==OK:
 		for i in 3:
 			assist_flags[i]=bool(settings.get_value("assists",str(i),assist_flags[i]))
+	get_tree().quit_on_go_back = false
 	_update_display_scale()
 	get_window().size_changed.connect(_update_display_scale)
 	_setup_actions()
@@ -62,7 +63,8 @@ func _update_display_scale() -> void:
 	if dimensions.x <= 0 or dimensions.y <= 0:
 		return
 	# A landscape phone needs usable touch targets, not a letterboxed desktop UI.
-	var logical_width := 1200 if dimensions.y < 600 and dimensions.x > dimensions.y else 1440
+	var phone_layout := OS.has_feature("mobile") or dimensions.y < 600
+	var logical_width := 1200 if phone_layout and dimensions.x > dimensions.y else 1440
 	var logical_size := Vector2i(logical_width,roundi(float(logical_width)*dimensions.y/dimensions.x))
 	if get_window().content_scale_size != logical_size:
 		get_window().content_scale_size = logical_size
@@ -524,6 +526,13 @@ func _clear_controls() -> void:
 	for action: String in held:
 		held[action] = false
 	touch_actions.clear()
+
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_WM_GO_BACK_REQUEST and flight != null:
+		_clear_controls()
+		_pause()
+	elif what == NOTIFICATION_APPLICATION_PAUSED:
+		_lose_focus()
 
 func _lose_focus() -> void:
 	_clear_controls()

@@ -38,7 +38,11 @@ Choose a fresh output directory for each packaging run. The script also produces
 
 Automated mobile viewport checks are not a substitute for physical phone performance and touch testing. Portrait layout is not yet a supported play mode. The footer's radio bubble can scroll when narrow.
 
-## Native apps later
+## Native Android demos
+
+The browser build remains available for desktop testing. For phone playtests, use the native Android demo workflow and installation instructions in [ANDROID-DEMO.md](ANDROID-DEMO.md). Google Play internal testing follows developer-account setup and a separate signed AAB release.
+
+## Other native apps
 
 A browser link is the first distribution path. Desktop exports can be provided as downloads later, but macOS distribution benefits from signing/notarization. Android APK testing needs an Android export setup and signing key; Google Play and iOS/TestFlight add their own account/signing/review work. None of those accounts or signing keys are needed for the Pages browser playtest.
 

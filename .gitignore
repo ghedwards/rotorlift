@@ -5,3 +5,7 @@
 .DS_Store
 __pycache__/
 *.pyc
+*.keystore
+*.jks
+.env
+.env.*

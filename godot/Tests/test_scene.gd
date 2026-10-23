@@ -27,6 +27,16 @@ func run() -> void:
 	await process_frame
 	check(scene.overlay.visible, "Pause overlay was not shown")
 	scene._pause()
+	# Android Back must pause instead of exiting, and backgrounding releases inputs.
+	check(not scene.get_tree().quit_on_go_back, "Android Back still exits the game")
+	scene.held.left = true
+	scene._notification(Node.NOTIFICATION_WM_GO_BACK_REQUEST)
+	check(scene.flight.status == FlightModel.Status.PAUSED and not scene._control("left"), "Android Back did not pause and release controls")
+	scene._notification(Node.NOTIFICATION_WM_GO_BACK_REQUEST)
+	check(scene.flight.status == FlightModel.Status.PLAYING, "Android Back did not resume")
+	scene._notification(Node.NOTIFICATION_APPLICATION_PAUSED)
+	check(scene.flight.status == FlightModel.Status.PAUSED, "Backgrounding did not pause flight")
+	scene._pause()
 	# Utility panels must pause safely and release held mobile inputs.
 	scene._show_manual()
 	check(scene.flight.status == FlightModel.Status.PAUSED, "Manual did not pause flight")

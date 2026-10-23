@@ -1,0 +1,91 @@
+name: Build Android demo
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      GODOT_VERSION: '4.7.2'
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Install matching Godot editor and APK template
+        shell: bash
+        run: |
+          set -euo pipefail
+          release="${GODOT_VERSION}-stable"
+          base="https://github.com/godotengine/godot-builds/releases/download/${release}"
+          editor="Godot_v${release}_linux.x86_64.zip"
+          templates="Godot_v${release}_export_templates.tpz"
+          cd "$RUNNER_TEMP"
+          curl -fLsS --retry 3 "$base/$editor" -o "$editor"
+          curl -fLsS --retry 3 "$base/$templates" -o "$templates"
+          curl -fLsS --retry 3 "$base/SHA512-SUMS.txt" -o SHA512-SUMS.txt
+          python3 - "$editor" "$templates" "$GODOT_VERSION" <<'PY'
+          import hashlib, pathlib, sys, zipfile
+          sums={line.split()[-1].lstrip('*'):line.split()[0] for line in pathlib.Path('SHA512-SUMS.txt').read_text().splitlines() if line.strip()}
+          for name in sys.argv[1:3]:
+              if hashlib.file_digest(open(name,'rb'),'sha512').hexdigest()!=sums.get(name):
+                  raise SystemExit('Checksum mismatch: '+name)
+          target=pathlib.Path.home()/'.local/share/godot/export_templates'/f'{sys.argv[3]}.stable'
+          target.mkdir(parents=True,exist_ok=True)
+          with zipfile.ZipFile(sys.argv[2]) as archive:
+              for member in archive.namelist():
+                  name=pathlib.PurePosixPath(member).name
+                  if name in ['android_debug.apk','version.txt']:
+                      (target/name).write_bytes(archive.read(member))
+          PY
+          unzip -q "$editor" -d godot-bin
+          chmod +x "godot-bin/Godot_v${release}_linux.x86_64"
+          ln -s "$RUNNER_TEMP/godot-bin/Godot_v${release}_linux.x86_64" "$RUNNER_TEMP/godot-bin/godot"
+          echo "$RUNNER_TEMP/godot-bin" >> "$GITHUB_PATH"
+      - name: Configure SDK and temporary demo signing
+        shell: bash
+        run: |
+          set -euo pipefail
+          sdkmanager 'platform-tools' 'build-tools;36.0.0' 'platforms;android-36'
+          mkdir -p "$HOME/.config/godot"
+          python3 - <<'PY'
+          import os, pathlib, json
+          settings='[gd_resource type="EditorSettings" format=3]\n\n[resource]\n'
+          for key,value in {'export/android/android_sdk_path':os.environ['ANDROID_HOME'],'export/android/java_sdk_path':os.environ['JAVA_HOME']}.items():
+              settings+=key+' = '+json.dumps(value)+'\n'
+          (pathlib.Path.home()/'.config/godot/editor_settings-4.7.tres').write_text(settings)
+          PY
+          keytool -genkeypair -noprompt -keystore "$RUNNER_TEMP/demo.keystore" -storepass android -keypass android -alias androiddebugkey -keyalg RSA -keysize 2048 -validity 10000 -dname 'CN=AIRLIFT Demo,O=Development,C=AU'
+      - name: Import and test game
+        shell: bash
+        run: |
+          set -euo pipefail
+          godot --headless --path godot --editor --import --quit
+          for suite in scene rescue animation flight; do
+            godot --headless --path godot --script "Tests/test_${suite}.gd" 2>&1 | tee "$RUNNER_TEMP/test-${suite}.log"
+            if grep -Eq 'SCRIPT ERROR|Parse Error|ERROR:' "$RUNNER_TEMP/test-${suite}.log"; then exit 1; fi
+          done
+      - name: Export and verify APK
+        env:
+          GODOT_ANDROID_KEYSTORE_DEBUG_PATH: ${{ runner.temp }}/demo.keystore
+          GODOT_ANDROID_KEYSTORE_DEBUG_USER: androiddebugkey
+          GODOT_ANDROID_KEYSTORE_DEBUG_PASSWORD: android
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p godot/builds/android
+          godot --headless --path godot --export-debug 'Android Demo' builds/android/airlift-demo.apk
+          "$ANDROID_HOME/build-tools/36.0.0/apksigner" verify --verbose godot/builds/android/airlift-demo.apk
+          "$ANDROID_HOME/build-tools/36.0.0/aapt" dump badging godot/builds/android/airlift-demo.apk | tee godot/builds/android/apk-info.txt
+          cp godot/ANDROID-DEMO.md godot/builds/android/INSTALL.md
+          cd godot/builds/android
+          sha256sum airlift-demo.apk > SHA256SUMS.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: airlift-android-demo
+          path: godot/builds/android/
+          retention-days: 30
+          if-no-files-found: error
