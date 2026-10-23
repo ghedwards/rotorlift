@@ -530,7 +530,10 @@ func _clear_controls() -> void:
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_WM_GO_BACK_REQUEST and flight != null:
 		_clear_controls()
-		_pause()
+		if settings_panel != null and settings_panel.visible:
+			settings_panel.hide()
+		elif flight.status != FlightModel.Status.READY or manual_open:
+			_pause()
 	elif what == NOTIFICATION_APPLICATION_PAUSED:
 		_lose_focus()
 

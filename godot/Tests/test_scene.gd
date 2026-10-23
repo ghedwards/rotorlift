@@ -44,7 +44,8 @@ func run() -> void:
 	check(scene.flight.status == FlightModel.Status.PLAYING, "Manual did not restore flight")
 	scene._show_settings()
 	check(scene.flight.status == FlightModel.Status.PAUSED, "Settings did not pause flight")
-	scene.settings_panel.hide()
+	scene._notification(Node.NOTIFICATION_WM_GO_BACK_REQUEST)
+	check(not scene.settings_panel.visible, "Android Back did not close settings")
 	check(scene.flight.status == FlightModel.Status.PLAYING, "Settings did not restore flight")
 	for button in scene.control_buttons.values():
 		check(button.size.x >= 100 and button.size.y >= 100, "Mobile flight target is too small")
