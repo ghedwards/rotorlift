@@ -15,6 +15,7 @@ window/size/window_height_override=800
 window/stretch/mode="canvas_items"
 window/stretch/aspect="expand"
 window/handheld/orientation=4
+window/subwindows/embed_subwindows=true
 
 [rendering]
 renderer/rendering_method="gl_compatibility"

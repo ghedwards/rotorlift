@@ -32,3 +32,5 @@ License: [Lucide-LICENSE.txt](Lucide-LICENSE.txt). SVG geometry is unmodified; `
 - `menu.svg`: `icons/menu.svg`
 
 `rescue-cross.svg` is an original red rounded square with a transparent rescue cross cut out of its centre.
+
+`toggle-on.svg` and `toggle-off.svg` are original switch controls in the game palette.

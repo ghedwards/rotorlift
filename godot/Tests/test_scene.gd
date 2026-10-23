@@ -141,6 +141,29 @@ func run() -> void:
 	scene._select_mission(0)
 	scene._toggle_sound()
 	check(not scene.muted and scene.audio.stream != null, "Sound cue did not initialize")
+	# Dialogs must fit the scaled landscape phone viewport, with all assists visible.
+	root.size = Vector2i(844,390)
+	scene._update_display_scale()
+	await process_frame
+	await process_frame
+	scene._show_settings()
+	await process_frame
+	await process_frame
+	var screen := Rect2(Vector2.ZERO,scene.get_viewport_rect().size)
+	check(screen.encloses(scene.settings_panel.get_global_rect()),"Settings extend beyond phone viewport")
+	check(scene.settings_scroll.get_global_rect().encloses(scene.assist_checks[2].get_global_rect()),"Auto-hoist control is clipped on a landscape phone")
+	check(is_equal_approx(scene.mission_picker.global_position.y,scene.assist_checks[0].global_position.y),"First settings rows are not aligned")
+	check(is_equal_approx(scene.sound_button.global_position.y,scene.assist_checks[1].global_position.y),"Second settings rows are not aligned")
+	check(is_equal_approx(scene.mission_picker.size.y,scene.assist_checks[0].size.y),"Settings controls have inconsistent heights")
+	scene.settings_panel.hide()
+	scene._show_menu()
+	await process_frame
+	check(screen.encloses(scene.menu_panel.get_global_rect()),"Menu extends beyond phone viewport")
+	scene.menu_panel.hide()
+	scene._show_manual()
+	await process_frame
+	check(screen.encloses(scene.overlay_card.get_global_rect()),"Manual extends beyond phone viewport")
+	scene._pause()
 	await process_frame
 	# Capture only with the real renderer; headless uses a dummy rendering device.
 	if DisplayServer.get_name() != "headless":
