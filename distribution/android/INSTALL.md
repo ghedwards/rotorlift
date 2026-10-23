@@ -2,7 +2,9 @@
 
 ## Install on a phone
 
-This is a native, offline ARM64 Android demo. Download `airlift-demo.apk` to the phone, open it, and allow that browser/file manager to install the APK when Android asks. Rotate to landscape. Google Play Protect may ask to scan an app installed outside the Play Store.
+Open https://ghedwards.github.io/rotorlift/download/ on the phone and tap **Download for Android**. The APK is hosted directly on GitHub Pages and requires no GitHub login.
+
+This is a native, offline ARM64 Android demo. Download `airlift-demo.apk` to the phone, open it, and allow that browser/file manager to install the APK when Android asks. The app stays in landscape; either sideways orientation works. Google Play Protect may ask to scan an app installed outside the Play Store.
 
 Only install the file shared by the developer. You can turn the install permission back off afterwards. No Google Play account is needed for this APK playtest.
 
@@ -13,6 +15,7 @@ This build is for direct testing, not a Google Play upload. Each workflow run us
 - Start at the base and take off. Hold steering and altitude controls simultaneously.
 - Complete a winch rescue, check the route/tension panel switch, and return to base.
 - Land at the field pad, send the rescuer, help the survivor, and return together.
+- Check the compact footer: WINCH deploys the crew, HOIST retrieves the patient, and CANCEL withdraws the line.
 - Test sound, settings and help. Android Back pauses/resumes the game.
 - Switch to another app and back: the game should remain paused until resumed.
 - Report phone model, Android version, the action that failed, and whether the problem is layout, input or frame rate.
@@ -48,3 +51,7 @@ References:
 - https://docs.godotengine.org/en/stable/tutorials/export/exporting_for_android.html
 - https://support.google.com/googleplay/android-developer/answer/6112435
 - https://support.google.com/googleplay/android-developer/answer/9845334
+
+## Update the Pages download
+
+Replace `distribution/android/airlift-demo.apk`, `SHA256SUMS.txt` and `INSTALL.md` with the verified demo build. Update `build-info.json` with the exact version, source commit, byte count and SHA-256. The Pages packager rejects an APK whose size or checksum differs. Push to `main` to publish `/download/`; this copy stays available after the temporary Actions artifact expires. The browser-only ZIP excludes the native download.
