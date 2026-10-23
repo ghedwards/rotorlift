@@ -48,8 +48,11 @@ func _draw() -> void:
 	# Transparent shading leaves the landscape visible while protecting legibility.
 	draw_texture_rect(upper_shade,Rect2(0,0,size.x,170),false)
 	_draw_top_panel()
-	_draw_tension()
-	_draw_route()
+	draw_line(Vector2(size.x-312,24),Vector2(size.x-312,104),Color("43564a"),1)
+	if flight.winch != FlightModel.Winch.STOWED or flight.cable > 0 or flight.overload_warning > 0:
+		_draw_tension()
+	else:
+		_draw_route()
 	for corner in [Vector2(8,8),Vector2(size.x-8,8),Vector2(8,size.y-8),Vector2(size.x-8,size.y-8)]:
 		var direction := Vector2(1 if corner.x<20 else -1,1 if corner.y<20 else -1)
 		draw_line(corner,corner+Vector2(10*direction.x,0),Color(0.92,0.94,0.84,0.75),1)
@@ -91,28 +94,23 @@ func _integrity_segment(active: bool) -> StyleBoxFlat:
 	return segment
 
 func _draw_tension() -> void:
-	if flight.cable <= 0 and flight.overload_warning <= 0:
-		return
-	var origin := Vector2(size.x-191,152)
+	var origin := Vector2(size.x-288,39)
 	var ratio := clampf(flight.tether_tension/FlightModel.TETHER_LIMIT,0,1)
 	var broken := flight.overload_warning > 0
 	if broken:
 		ratio = 1
 	var color := Color("ef7967") if broken or ratio >= 0.85 else ORANGE if ratio >= 0.6 else Color("a9d9aa")
-	draw_rect(Rect2(origin-Vector2(12,16),Vector2(175,112)),Color(0.05,0.10,0.09,0.78))
-	_text(origin,"LINE TENSION",9,CREAM)
-	_text(origin+Vector2(0,24),"%d%%" % roundi(ratio*100),19,color,DISPLAY)
-	_text(origin+Vector2(82,22),"LIMIT",8,MUTED)
-	var bar := Rect2(origin+Vector2(0,34),Vector2(126,9))
-	draw_rect(bar,Color(0.8,0.9,0.8,0.12))
+	_text(origin,"Line tension",16,MUTED)
+	_text(origin+Vector2(206,0),"%d%%" % roundi(ratio*100),20,color,DISPLAY)
+	var bar := Rect2(origin+Vector2(0,14),Vector2(260,10))
+	draw_rect(bar,Color("43564a"))
 	draw_rect(Rect2(bar.position,Vector2(bar.size.x*ratio,bar.size.y)),color)
-	draw_line(bar.position+Vector2(126,-3),bar.end+Vector2(0,3),Color("ef7967"),2,true)
+	draw_line(bar.position+Vector2(260,-3),bar.end+Vector2(0,3),Color("ef7967"),2,true)
 	var label := "DISCONNECTED" if broken else "EASE OFF" if ratio>=0.85 else "TAUT" if ratio>=0.6 else "TETHERED" if flight.contact>=0 else "TETHER OFF" if not flight.ground_tether else "FREE LINE"
-	_text(origin+Vector2(0,63),label,9,color)
-	_text(origin+Vector2(0,78),"100% = RELEASE",8,MUTED)
+	_text(origin+Vector2(0,47),label,14,color)
+	_text(origin+Vector2(0,65),"100% tension releases the line",14,MUTED)
 
 func _draw_route() -> void:
-	draw_line(Vector2(size.x-312,24),Vector2(size.x-312,104),Color("43564a"),1)
 	var origin := Vector2(size.x-288,39)
 	_text(origin,"Mission route",16,MUTED)
 	_text(origin+Vector2(206,0),"%s / 03" % flight.mission.id,14,MUTED)

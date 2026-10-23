@@ -21,7 +21,7 @@ var mission: Dictionary
 var status: Status = Status.READY
 var winch: Winch = Winch.STOWED
 var targets: Array[int] = []
-var position := Vector2(510, 305)
+var position := Vector2.ZERO
 var velocity := Vector2.ZERO
 var facing := 1
 var fuel := 100.0
@@ -53,6 +53,8 @@ var message := "Rescue crew ready. You are cleared for takeoff."
 
 func _init(operation: Dictionary) -> void:
 	mission = operation
+	position = Vector2(245, ground(245)-56)
+	altitude_hold_y = position.y
 	for target in mission.targets:
 		targets.append(Survivor.WAITING)
 	message = mission.description
