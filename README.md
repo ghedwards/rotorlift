@@ -21,3 +21,5 @@ The [Pages workflow](.github/workflows/pages.yml) builds and tests the Godot gam
 Static artwork and animated character atlases are editable SVGs in `godot/Assets/Art`. UI icons are bundled from Lucide with their source revision and license in `godot/Assets/Icons`. The gameplay geometry, rotors, rope and effects remain dynamic.
 
 The earlier React/Canvas prototype remains in `src/` and `airlift.html`; its [original instructions](docs/html-prototype.md) are retained for reference. The Pages workflow deploys the Godot edition.
+
+Native Android demo: [download and installation](https://ghedwards.github.io/rotorlift/download/).

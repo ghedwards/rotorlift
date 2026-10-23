@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - 'godot/**'
+      - 'distribution/android/**'
       - '.github/workflows/pages.yml'
 permissions:
   contents: read

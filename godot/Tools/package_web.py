@@ -1,6 +1,6 @@
 """Package an existing Godot Web export as a clean Pages site and upload ZIP."""
 from pathlib import Path
-import argparse, shutil, zipfile, json
+import argparse, shutil, zipfile, json, hashlib, html
 project=Path(__file__).resolve().parents[1]
 parser=argparse.ArgumentParser()
 parser.add_argument('--source',type=Path,default=project/'builds/web')
@@ -29,3 +29,21 @@ with zipfile.ZipFile(archive,'w',zipfile.ZIP_DEFLATED,compresslevel=9) as bundle
  for path in sorted(output.rglob('*')):
   if path.is_file():bundle.write(path,path.relative_to(output))
 print(f'Site: {output}\nZIP: {archive} ({archive.stat().st_size/1048576:.1f} MiB)')
+
+# Publish the native demo beside the browser game, outside the browser-only ZIP.
+android_source=project.parent/'distribution/android'
+if android_source.exists():
+ metadata=json.loads((android_source/'build-info.json').read_text())
+ apk=android_source/'airlift-demo.apk'
+ if apk.stat().st_size!=metadata['bytes'] or hashlib.sha256(apk.read_bytes()).hexdigest()!=metadata['sha256']:
+  raise SystemExit('Android APK does not match its recorded size/checksum')
+ expected=(android_source/'SHA256SUMS.txt').read_text().split()[0]
+ if expected!=metadata['sha256']:raise SystemExit('Android checksum file does not match metadata')
+ download=output/'download';download.mkdir()
+ for name in ['airlift-demo.apk','SHA256SUMS.txt','INSTALL.md','build-info.json']:
+  shutil.copy2(android_source/name,download/name)
+ page=(android_source/'index.html').read_text()
+ for token,value in {'SIZE':f"{metadata['bytes']/1000000:.1f}",'VERSION':metadata['version'],'SHA':metadata['sha256']}.items():
+  page=page.replace('@@'+token+'@@',html.escape(value))
+ (download/'index.html').write_text(page)
+ print(f"Android download: {download} ({metadata['version']})")
