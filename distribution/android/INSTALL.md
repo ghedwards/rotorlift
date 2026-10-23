@@ -37,6 +37,10 @@ godot --headless --path godot --export-debug 'Android Demo' builds/android/airli
 
 Never commit signing keystores/passwords. Build outputs and Android secrets are ignored by Git.
 
+## Play Store identity
+
+The **Android Play** export preset uses the permanent package name `com.studioeddies.airlift` and display name **AIRLIFT**, with Gradle/AAB output. The **Build Google Play bundle** workflow installs the matching Android build templates and signs using the permanent upload key from encrypted repository secrets. Use release export, never the temporary demo signing key, for Play uploads. The existing **Android Demo** preset and published APK retain their separate demo package.
+
 ## Move to Google Play internal testing
 
 1. Create a Google Play Console developer account (US$25 one-time registration fee), complete Google's identity/device verification and required account steps.
@@ -56,3 +60,11 @@ References:
 ## Update the Pages download
 
 Replace `distribution/android/airlift-demo.apk`, `SHA256SUMS.txt` and `INSTALL.md` with the verified demo build. Update `build-info.json` with the exact version, source commit, byte count and SHA-256. The Pages packager rejects an APK whose size or checksum differs. Push to `main` to publish `/download/`; this copy stays available after the temporary Actions artifact expires. The browser-only ZIP excludes the native download.
+
+## Build for the Play Console draft
+
+Run **Build Google Play bundle** in GitHub Actions. It tests the game, exports the release-signed `Android Play` AAB, checks its manifest and signature, and uploads the `airlift-google-play` artifact. It does not upload or roll out a Play Console release.
+
+The artifact includes `airlift-play.aab`, checksum, manifest, signature report and public upload certificate. Upload the AAB to the existing Internal testing draft for `com.studioeddies.airlift`, with Google-managed Play App Signing.
+
+The permanent upload key alias is `airlift-upload`. Local signing material lives in the ignored root `.signing/` directory; keep a separate secure backup of that directory, including its password file. Never commit it. GitHub Actions uses `ANDROID_UPLOAD_KEYSTORE_BASE64` and `ANDROID_UPLOAD_KEYSTORE_PASSWORD` repository secrets. Future Play bundles must keep this upload key and increase the Play preset's version code. The public PEM certificate is safe to give Google; the private JKS and password are not.
