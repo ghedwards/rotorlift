@@ -103,10 +103,10 @@ jobs:
           root=ET.parse('godot/builds/play/AndroidManifest.xml').getroot()
           android='{http://schemas.android.com/apk/res/android}'
           assert root.attrib['package']=='com.studioeddies.airlift'
-          assert root.attrib[android+'versionName']=='0.1.4'
+          assert root.attrib[android+'versionName']=='0.0.1'
           assert root.find('application').get(android+'debuggable','false')=='false'
           assert any(a.get(android+'screenOrientation') in ['userLandscape','11'] for a in root.findall('./application/activity'))
-          print('Verified release bundle: com.studioeddies.airlift, version 0.1.4, landscape, non-debuggable')
+          print('Verified release bundle: com.studioeddies.airlift, version 0.0.1, landscape, non-debuggable')
           PYCODE
           cd godot/builds/play
           sha256sum airlift-play.aab > SHA256SUMS.txt
