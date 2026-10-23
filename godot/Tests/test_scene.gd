@@ -103,6 +103,23 @@ func run() -> void:
 	left_touch.pressed = false
 	controls.handle_event(left_touch)
 	check(controls.stick == Vector2.ZERO, "Releasing stick retained input")
+	# The rescue button mirrors the current attempt rather than accumulating time.
+	scene.flight.contact = 0
+	var duration: float = scene.flight.pickup_duration(0)
+	scene.flight.pickup_progress = duration/2
+	scene._refresh()
+	check(is_equal_approx(controls.rescue_progress,0.5) and is_equal_approx(controls.rescue_remaining,duration/2),"Button countdown does not match survivor loading")
+	scene.flight.contact = -1
+	scene.flight.pickup_progress = 0
+	scene._refresh()
+	check(controls.rescue_progress<0,"Cancelled pickup retained its button countdown")
+	scene.flight.contact = 0
+	scene.flight.winch = FlightModel.Winch.READY_TO_HOIST
+	scene._refresh()
+	check(controls.rescue_progress == 1 and controls.rescue_remaining == 0,"Ready-to-hoist button retained a countdown")
+	scene.flight.contact = -1
+	scene.flight.winch = FlightModel.Winch.LOWERING
+	scene._refresh()
 	# Opening the top menu pauses and drops every active pointer.
 	left_touch.pressed = true
 	controls.handle_event(left_touch)

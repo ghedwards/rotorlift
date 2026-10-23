@@ -526,6 +526,15 @@ func _refresh() -> void:
 	touch_controls.winch_active = flight.winch != FlightModel.Winch.STOWED or flight.crew_index >= 0
 	touch_controls.winch_icon = _icon("up") if flight.winch in [FlightModel.Winch.READY_TO_HOIST,FlightModel.Winch.RETRIEVING] else _icon("rescue-cross")
 	touch_controls.winch_description = "Help / board" if flight.crew_index >= 0 else "Send rescuer" if flight.can_disembark() else "Hoist patient" if flight.winch == FlightModel.Winch.READY_TO_HOIST else "Cancel pickup" if flight.winch == FlightModel.Winch.LOWERING else "Deploy winch"
+	touch_controls.rescue_progress = -1
+	touch_controls.rescue_remaining = -1
+	if flight.crew_index >= 0 and flight.crew_state == 1:
+		touch_controls.rescue_progress = clampf(flight.crew_progress/3,0,1)
+		touch_controls.rescue_remaining = maxf(0,3-flight.crew_progress)
+	elif flight.contact >= 0 and flight.attached < 0 and flight.winch in [FlightModel.Winch.LOWERING,FlightModel.Winch.READY_TO_HOIST]:
+		var duration := flight.pickup_duration(flight.contact)
+		touch_controls.rescue_progress = 1 if flight.winch == FlightModel.Winch.READY_TO_HOIST else clampf(flight.pickup_progress/duration,0,1)
+		touch_controls.rescue_remaining = 0 if flight.winch == FlightModel.Winch.READY_TO_HOIST else maxf(0,duration-flight.pickup_progress)
 	touch_controls.queue_redraw()
 	menu_button.disabled = portrait_blocked or manual_open or settings_panel.visible
 	var show_overlay := not settings_panel.visible and not menu_panel.visible and (manual_open or flight.status in [FlightModel.Status.PAUSED,FlightModel.Status.FAILED,FlightModel.Status.COMPLETE])

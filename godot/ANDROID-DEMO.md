@@ -16,7 +16,7 @@ This build is for direct testing, not a Google Play upload. Each workflow run us
 - Start at the base and take off. Move the left joystick diagonally to steer and climb together; try small and full movements.
 - Complete a winch rescue, check the route/tension panel switch, and return to base.
 - Land at the field pad, send the rescuer, help the survivor, and return together.
-- Keep one finger on the joystick while another taps the round right-hand winch button. The rescue cross deploys/cancels the winch and handles ground rescues; the up arrow hoists the stretcher.
+- Keep one finger on the joystick while another taps the round right-hand winch button. The rescue cross deploys/cancels the winch and handles ground rescues; the up arrow hoists the stretcher. The button mirrors the current loading timer, then shows a green Ready ring when hoisting is available.
 - Open the top-bar menu and check Resume, Settings, Flight manual and Fullscreen. Opening it pauses flight and releases both thumbs. Android Back closes menus or pauses/resumes the game.
 - Switch to another app and back: the game should remain paused until resumed.
 - Report phone model, Android version, the action that failed, and whether the problem is layout, input or frame rate.

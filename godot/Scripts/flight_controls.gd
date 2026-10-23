@@ -3,6 +3,7 @@ extends Control
 ## Independent thumb ownership, with mouse support for the desktop preview.
 signal winch_pressed
 
+const FONT = preload("res://Assets/Fonts/DMSans.ttf")
 const DEAD_ZONE := 0.14
 const STICK_RADIUS := 92.0
 const TRAVEL := 54.0
@@ -16,6 +17,8 @@ var winch_pointer := -1
 var enabled := true
 var vertical_enabled := true
 var winch_active := false
+var rescue_progress := -1.0
+var rescue_remaining := -1.0
 var winch_icon: Texture2D = preload("res://Assets/Icons/rescue-cross.svg")
 var winch_description := "Deploy winch / Space"
 
@@ -114,10 +117,21 @@ func _draw() -> void:
 	draw_circle(puck,5,Color(0.93,0.93,0.81,0.65))
 	var button := winch_center()
 	var active := winch_pointer != -1
-	var tint := Color("f28a50") if winch_active else cream
+	var tint := Color("a9d9aa") if rescue_progress >= 1 else Color("f28a50") if winch_active else cream
 	draw_circle(button,WINCH_RADIUS,Color(0.07,0.14,0.12,0.46 if active else 0.28))
 	draw_arc(button,WINCH_RADIUS,0,TAU,80,Color(tint,0.75 if active else 0.5),2,true)
 	if winch_active:
 		draw_arc(button,WINCH_RADIUS-6,-PI*0.75,PI*0.75,64,Color(tint,0.6),2,true)
 	var icon_color := Color.WHITE if winch_icon.resource_path.ends_with("rescue-cross.svg") else tint
-	draw_texture_rect(winch_icon,Rect2(button-Vector2.ONE*27,Vector2.ONE*54),false,Color(icon_color,0.95))
+	var icon_size := 42.0 if rescue_progress >= 0 else 54.0
+	var icon_center := button-Vector2(0,12) if rescue_progress >= 0 else button
+	draw_texture_rect(winch_icon,Rect2(icon_center-Vector2.ONE*icon_size/2,Vector2.ONE*icon_size),false,Color(icon_color,0.95))
+	if rescue_progress >= 0:
+		draw_arc(button,WINCH_RADIUS+6,0,TAU,80,Color(0.93,0.93,0.81,0.15),3,true)
+		draw_arc(button,WINCH_RADIUS+6,-PI/2,-PI/2+TAU*maxf(0.001,rescue_progress),80,tint,4,true)
+		var label := "Ready" if rescue_progress >= 1 else "%.1fs" % maxf(0,rescue_remaining)
+		var width := FONT.get_string_size(label,HORIZONTAL_ALIGNMENT_LEFT,-1,22).x
+		var text_at := button+Vector2(-width/2,35)
+		draw_string(FONT,text_at+Vector2(0,1),label,HORIZONTAL_ALIGNMENT_LEFT,-1,22,Color(0.02,0.06,0.04,0.7))
+		draw_string(FONT,text_at,label,HORIZONTAL_ALIGNMENT_LEFT,-1,22,tint)
+
