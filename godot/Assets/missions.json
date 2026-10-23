@@ -381,7 +381,9 @@
         "x": 6080,
         "height": 95
       }
-    ]
+    ],
+    "wind_direction_period": 32,
+    "wind_response": 1.6
   },
   {
     "id": "03",
@@ -571,6 +573,8 @@
         "x": 6180,
         "height": 95
       }
-    ]
+    ],
+    "wind_direction_period": 40,
+    "wind_response": 1.4
   }
 ]

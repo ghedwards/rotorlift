@@ -1,2 +1,4 @@
 .godot/
 builds/
+android/build/
+android/.build_version

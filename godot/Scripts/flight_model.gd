@@ -8,6 +8,13 @@ enum Status { READY, PLAYING, PAUSED, COMPLETE, FAILED }
 enum Winch { STOWED, LOWERING, RETRIEVING, READY_TO_HOIST }
 enum Survivor { WAITING, ATTACHED, RESCUED }
 
+# Landing limits in world units/second. Raise descent speed for more forgiving touchdowns.
+const MAX_LANDING_DESCENT_SPEED := 110.0
+const MAX_LANDING_HORIZONTAL_SPEED := 35.0
+const BIRD_COUNT := 3
+const BIRD_RADIUS := 14.0
+const WIND_ACCELERATION := 0.65
+
 var altitude_assist := false
 var ground_tether := true
 var auto_hoist := false
@@ -59,7 +66,7 @@ func _init(operation: Dictionary) -> void:
 		targets.append(Survivor.WAITING)
 	message = mission.description
 	_build_world()
-	for i in 5:
+	for i in BIRD_COUNT:
 		birds.append({"dead": false, "position": Vector2.ZERO, "velocity": Vector2.ZERO, "age": 0.0, "grounded": false})
 
 func pickup_duration(index: int) -> float:
@@ -252,7 +259,9 @@ func hit(reason: String) -> void:
 
 
 func wind_knots() -> float:
-	return float(mission.wind) * (0.75 + 0.25 * sin(clock * 0.23)) * cos(clock * 0.045)
+	# Later missions can independently tune direction changes and aircraft drift.
+	var period := float(mission.get("wind_direction_period",140.0))
+	return float(mission.wind) * (0.75 + 0.25 * sin(clock * 0.23)) * cos(clock * TAU / period)
 
 func winch_origin() -> Vector2:
 	return position+(WINCH_MOUNT*Vector2(facing,1)).rotated(velocity.x*0.00045)
@@ -265,7 +274,7 @@ func hook_position() -> Vector2:
 func bird_position(i: int) -> Vector2:
 	if birds[i].dead:
 		return birds[i].position
-	return Vector2(1500 + i * 26 + sin(clock * 0.15) * 170, 200 + i % 3 * 17 + sin(clock + i) * 6)
+	return Vector2(1500 + i * 65 + sin(clock * 0.15) * 170, 200 + i % 3 * 17 + sin(clock + i) * 6)
 
 func tree_polygon(x: float, bottom: float, height: float) -> PackedVector2Array:
 	var points := PackedVector2Array([Vector2(x, bottom - height)])
@@ -382,7 +391,7 @@ func _rotor_bird_contacts() -> void:
 			var point := bird_position(i)
 			var touching := Geometry2D.is_point_in_polygon(point, rotor)
 			for j in rotor.size():
-				if Geometry2D.get_closest_point_to_segment(point,rotor[j],rotor[(j+1)%rotor.size()]).distance_to(point) < 8:
+				if Geometry2D.get_closest_point_to_segment(point,rotor[j],rotor[(j+1)%rotor.size()]).distance_to(point) < BIRD_RADIUS:
 					touching = true
 			if touching:
 				birds[i].position = point
@@ -431,7 +440,7 @@ func _tick(dt: float, steer: float, throttle: bool, descend: bool, vertical_inpu
 	if auto_hoist and winch==Winch.READY_TO_HOIST:
 		toggle_winch()
 	var loaded := attached >= 0
-	var acceleration := steer * (320 if steer * velocity.x < 0 else 100) + wind_knots() * 0.65
+	var acceleration := steer * (320 if steer * velocity.x < 0 else 100) + wind_knots() * WIND_ACCELERATION * float(mission.get("wind_response",1.0))
 	velocity.x = clampf(velocity.x + acceleration * dt, -280, 280)
 	if absf(velocity.x) > 15:
 		facing = 1 if velocity.x > 0 else -1
@@ -457,7 +466,7 @@ func _tick(dt: float, steer: float, throttle: bool, descend: bool, vertical_inpu
 	if position.y <= 110:
 		velocity.y = maxf(0, velocity.y)
 	var at_base := position.x > 190 and position.x < 320
-	var landing := (at_base or landing_site()>=0) and velocity.y < 80 and absf(velocity.x) < 35 and cable == 0
+	var landing := (at_base or landing_site()>=0) and velocity.y <= MAX_LANDING_DESCENT_SPEED and absf(velocity.x) < MAX_LANDING_HORIZONTAL_SPEED and cable == 0
 	if landing and position.y + 56 >= ground(position.x):
 		position.y = ground(position.x) - 56
 		velocity.y = 0

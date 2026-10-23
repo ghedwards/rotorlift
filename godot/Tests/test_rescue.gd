@@ -34,6 +34,20 @@ func contact_flight() -> FlightModel:
 	return f
 
 func _initialize() -> void:
+	# A controlled 100-unit descent is now safe; a hard 125-unit descent is not.
+	for speed in [100.0,125.0]:
+		var landing_test := make_flight()
+		landing_test.position = Vector2(245,643)
+		landing_test.velocity = Vector2(0,speed)
+		landing_test.step(DT)
+		check((landing_test.velocity.y==0)==(speed==100.0),"Landing descent threshold did not distinguish controlled and hard touchdown")
+	var gust_test := make_flight()
+	gust_test.mission.wind=23
+	gust_test.mission.wind_direction_period=32
+	gust_test.mission.wind_response=1.6
+	check(gust_test.wind_knots()>0,"Later mission wind should initially push right")
+	gust_test.clock=16
+	check(gust_test.wind_knots()<0,"Later mission wind must reverse left")
 	# Analog lift must scale smoothly while preserving existing full-key behavior.
 	var gentle := make_flight()
 	var full := make_flight()

@@ -122,7 +122,7 @@ func _draw_character(p: Vector2, animation: String, phase: float, facing := 1) -
 	var frame := int(fposmod(phase,TAU)/TAU*12)%12
 	var destination := Rect2(p+Vector2(-25,-46),Vector2(50,50))
 	if facing<0:
-		destination.position.x += 50
+		# Godot normalizes the rectangle before flipping its texture. Keep the same bounds.
 		destination.size.x = -50
 	draw_texture_rect(character_frames[animation][frame],destination,false)
 
@@ -347,9 +347,8 @@ func _draw_ground_crew() -> void:
 		var escort_x := p.x-crew_facing*22
 		var escort := Vector2(escort_x,flight.ground(escort_x))
 		_draw_character(escort,"survivor_walk" if crew_moving else "survivor_idle",crew_phase+0.5 if crew_moving else flight.clock*2,crew_facing)
-	if flight.crew_state==1:
-		draw_arc(p-Vector2(0,60),13,-PI/2,-PI/2+TAU*flight.crew_progress/3,32,ORANGE,3,true)
-	_world_label(p+Vector2(0,-85),"Helping %.1f s" % (3-flight.crew_progress) if flight.crew_state==1 else "Rescuer")
+	if flight.crew_state!=1:
+		_world_label(p+Vector2(0,-85),"Rescuer")
 
 func _draw_survivors() -> void:
 	for i in flight.targets.size():
@@ -363,9 +362,11 @@ func _draw_survivors() -> void:
 		if flight.targets[i] == FlightModel.Survivor.WAITING:
 			_person(p)
 		var center := flight.pickup_center(i)
-		var active := flight.contact == i
-		var ready := active and flight.winch == FlightModel.Winch.READY_TO_HOIST
-		var approaching: bool = target.get("mode","winch") != "landing" and flight.cable > 0 and flight.hook_position().distance_to(center) < 230
+		var ground_rescue: bool = target.get("mode","winch") == "landing" and flight.crew_index == i
+		var ground_distance := absf(flight.crew_x-p.x)
+		var active := (ground_rescue and flight.crew_state==1) or flight.contact == i
+		var ready := not ground_rescue and active and flight.winch == FlightModel.Winch.READY_TO_HOIST
+		var approaching: bool = (ground_rescue and flight.crew_state==0 and ground_distance<140) or (target.get("mode","winch") != "landing" and flight.cable > 0 and flight.hook_position().distance_to(center) < 230)
 		if active or approaching:
 			var tint := Color("9dd6a0") if ready else ORANGE
 			var radius := FlightModel.PICKUP_RADIUS
@@ -373,11 +374,14 @@ func _draw_survivors() -> void:
 			draw_arc(center,radius,0,TAU,64,Color(tint,0.75),1.5,true)
 			if active:
 				draw_arc(center,radius+6,0,TAU,64,Color(tint,0.2),1,true)
-				var fraction := 1.0 if ready else clampf(flight.pickup_progress/flight.pickup_duration(i),0,1)
+				var duration := 3.0 if ground_rescue else flight.pickup_duration(i)
+				var progress := flight.crew_progress if ground_rescue else flight.pickup_progress
+				var fraction := 1.0 if ready else clampf(progress/duration,0,1)
 				draw_arc(center,radius,-PI/2,-PI/2+TAU*maxf(0.001,fraction),64,Color("d7f1aa"),3.5,true)
-				_world_label(center+Vector2(0,-radius-24),"Ready to hoist" if ready else "%.1f s" % maxf(0,flight.pickup_duration(i)-flight.pickup_progress),tint)
+				_world_label(center+Vector2(0,-radius-24),"Ready to hoist" if ready else "%.1f s" % maxf(0,duration-progress),tint)
 			else:
-				_world_label(center+Vector2(0,-radius-24),"Keep hook here",tint)
+				var prompt := ("Tap rescue to help" if ground_distance<20 else "Walk closer") if ground_rescue else "Keep hook here"
+				_world_label(center+Vector2(0,-radius-24),prompt,tint)
 		# The numbered orange locator, dotted line and smoke match the original.
 		var tag := p - Vector2(21, 157)
 		if not active and not approaching:
@@ -448,10 +452,10 @@ func _draw_helicopter() -> void:
 	_world_transform()
 
 func _draw_birds() -> void:
-	for i in 5:
+	for i in flight.birds.size():
 		var bird := flight.bird_position(i)
 		var state: Dictionary = flight.birds[i]
-		var alpha := 0.7
+		var alpha := 1.0
 		var angle := 0.0
 		var flap := sin(flight.clock * 4 + i) * 6
 		if state.dead:
@@ -462,8 +466,9 @@ func _draw_birds() -> void:
 			flap = -3 # Folded wings; no flapping after a strike.
 		var silhouette := PackedVector2Array([Vector2(-8,-flap),Vector2(-4,-3),Vector2.ZERO,Vector2(4,-3),Vector2(8,-flap)])
 		for j in silhouette.size():
-			silhouette[j] = bird + silhouette[j].rotated(angle)
-		draw_polyline(silhouette,Color(0.15,0.24,0.23,alpha),1.5,true)
+			silhouette[j] = bird + (silhouette[j]*1.8).rotated(angle)
+		draw_polyline(silhouette,Color(0.88,0.88,0.73,alpha*0.75),5,true)
+		draw_polyline(silhouette,Color(0.08,0.14,0.13,alpha),3,true)
 
 func _draw_atmosphere() -> void:
 	for i in 6:

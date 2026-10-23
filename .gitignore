@@ -9,3 +9,6 @@ __pycache__/
 *.jks
 .env
 .env.*
+
+# Permanent signing material is local only.
+/.signing/
