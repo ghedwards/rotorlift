@@ -39,6 +39,13 @@ var touch_actions: Dictionary = {}
 var control_buttons: Dictionary = {}
 var audio: AudioStreamPlayer
 var last_status := FlightModel.Status.READY
+var rotation_overlay: PanelContainer
+var portrait_blocked := false
+var portrait_was_playing := false
+var deck_controls: HBoxContainer
+var deck_utilities: HBoxContainer
+var deck_wordmark: Label
+var footer_compact := false
 
 func _ready() -> void:
 	missions = JSON.parse_string(FileAccess.get_file_as_string("res://Assets/missions.json"))
@@ -56,6 +63,7 @@ func _ready() -> void:
 	_setup_theme()
 	_build_ui()
 	_select_mission(0)
+	_update_display_scale()
 	get_window().focus_exited.connect(_lose_focus)
 
 func _update_display_scale() -> void:
@@ -64,10 +72,66 @@ func _update_display_scale() -> void:
 		return
 	# A landscape phone needs usable touch targets, not a letterboxed desktop UI.
 	var phone_layout := OS.has_feature("mobile") or dimensions.y < 600
-	var logical_width := 1200 if phone_layout and dimensions.x > dimensions.y else 1440
+	var logical_width := 720 if dimensions.x < dimensions.y else 1200 if phone_layout else 1440
 	var logical_size := Vector2i(logical_width,roundi(float(logical_width)*dimensions.y/dimensions.x))
 	if get_window().content_scale_size != logical_size:
 		get_window().content_scale_size = logical_size
+	_set_portrait_blocked(dimensions.x < dimensions.y)
+
+func _set_portrait_blocked(blocked: bool) -> void:
+	if rotation_overlay != null:
+		rotation_overlay.visible = blocked
+	if blocked == portrait_blocked:
+		return
+	portrait_blocked = blocked
+	_clear_controls()
+	if flight == null:
+		return
+	if blocked:
+		if settings_panel.visible:
+			settings_panel.hide()
+		portrait_was_playing = flight.status == FlightModel.Status.PLAYING
+		if portrait_was_playing:
+			flight.toggle_pause()
+	else:
+		if portrait_was_playing and flight.status == FlightModel.Status.PAUSED and not manual_open:
+			flight.toggle_pause()
+		portrait_was_playing = false
+
+func _build_rotation_prompt() -> void:
+	rotation_overlay = PanelContainer.new()
+	rotation_overlay.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	rotation_overlay.add_theme_stylebox_override("panel",_style(Color("192c28"),Color.TRANSPARENT,32))
+	rotation_overlay.visible = portrait_blocked
+	add_child(rotation_overlay)
+	var center := CenterContainer.new()
+	rotation_overlay.add_child(center)
+	var content := VBoxContainer.new()
+	content.add_theme_constant_override("separation",24)
+	content.custom_minimum_size.x = 560
+	center.add_child(content)
+	var brand := _label("AIRLIFT.",56)
+	brand.add_theme_font_override("font",DISPLAY)
+	brand.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	content.add_child(brand)
+	var title := _label("Turn your phone\nsideways to fly.",48)
+	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	content.add_child(title)
+	var copy := _label("Landscape gives both thumbs room\nto steer, climb and work the winch.\n\nYour flight is paused while you rotate.",26)
+	copy.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	copy.add_theme_color_override("font_color",Color("bbc6b0"))
+	content.add_child(copy)
+
+func _update_footer_layout() -> void:
+	var compact := get_viewport_rect().size.x < 1300
+	if deck_controls == null or compact == footer_compact:
+		return
+	footer_compact = compact
+	deck_controls.add_theme_constant_override("separation",24 if compact else 32)
+	deck_wordmark.add_theme_font_size_override("font_size",44 if compact else 52)
+	for button: Button in deck_utilities.get_children():
+		button.custom_minimum_size = Vector2.ONE * (56 if compact else 64)
+	winch_button.custom_minimum_size.x = 152 if compact else 176
 
 func _setup_actions() -> void:
 	var keys := {"left": [KEY_A, KEY_LEFT], "right": [KEY_D, KEY_RIGHT], "up": [KEY_W, KEY_UP], "down": [KEY_S, KEY_DOWN], "winch": [KEY_SPACE, KEY_E], "pause": [KEY_P, KEY_ESCAPE], "restart": [KEY_R], "fullscreen": [KEY_F11]}
@@ -176,6 +240,7 @@ func _build_ui() -> void:
 	_build_settings()
 	audio = AudioStreamPlayer.new()
 	add_child(audio)
+	_build_rotation_prompt()
 
 func _build_overlay(scene: Control) -> void:
 	overlay = PanelContainer.new()
@@ -243,6 +308,7 @@ func _build_flight_deck(layout: VBoxContainer) -> void:
 	var margin := _margin(32,24,32,24)
 	panel.add_child(margin)
 	var controls := HBoxContainer.new()
+	deck_controls = controls
 	controls.add_theme_constant_override("separation",32)
 	var deck := VBoxContainer.new()
 	deck.add_theme_constant_override("separation",12)
@@ -294,10 +360,12 @@ func _build_flight_deck(layout: VBoxContainer) -> void:
 	brand.add_theme_constant_override("separation",0)
 	center.add_child(brand)
 	var wordmark := _label("AIRLIFT.",52)
+	deck_wordmark = wordmark
 	wordmark.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	wordmark.add_theme_font_override("font",DISPLAY)
 	brand.add_child(wordmark)
 	var utilities := HBoxContainer.new()
+	deck_utilities = utilities
 	utilities.alignment = BoxContainer.ALIGNMENT_CENTER
 	utilities.add_theme_constant_override("separation",4)
 	brand.add_child(utilities)
@@ -319,11 +387,11 @@ func _build_flight_deck(layout: VBoxContainer) -> void:
 		if definition[0]=="pause":
 			pause_button = button
 	center.add_child(radio_bubble)
-	winch_button = _button("DEPLOY WINCH",func(): flight.toggle_winch())
+	winch_button = _button("WINCH",func(): flight.toggle_winch())
 	winch_button.icon = null
 	winch_button.add_theme_constant_override("icon_max_width",24)
 	winch_button.add_theme_font_size_override("font_size",18)
-	winch_button.custom_minimum_size = Vector2(224,100)
+	winch_button.custom_minimum_size = Vector2(176,100)
 	_touch_style(winch_button,true)
 	for text_state in ["font_color","font_hover_color","font_pressed_color","font_focus_color"]:
 		winch_button.add_theme_color_override(text_state,Color("e2e8cf"))
@@ -470,7 +538,7 @@ func _process(dt: float) -> void:
 	if flight == null:
 		return
 	var steer := float(_control("right")) - float(_control("left"))
-	if not manual_open and not settings_panel.visible:
+	if not portrait_blocked and not manual_open and not settings_panel.visible:
 		flight.step(minf(dt, 0.04), steer, _control("up"), _control("down"))
 	if flight.status == FlightModel.Status.COMPLETE and last_status != flight.status:
 		var id: String = flight.mission.id
@@ -485,10 +553,10 @@ func _process(dt: float) -> void:
 	_refresh()
 
 func _control(action: String) -> bool:
-	return bool(held[action]) or Input.is_action_pressed("flight_" + action) or touch_actions.values().has(action)
+	return not portrait_blocked and (bool(held[action]) or Input.is_action_pressed("flight_" + action) or touch_actions.values().has(action))
 
 func _input(event: InputEvent) -> void:
-	if manual_open or settings_panel.visible:
+	if portrait_blocked or manual_open or settings_panel.visible:
 		return
 	# Track each finger independently so throttle and steering work together.
 	if event is InputEventScreenTouch:
@@ -505,6 +573,8 @@ func _input(event: InputEvent) -> void:
 				touch_actions[event.index] = action
 
 func _unhandled_key_input(event: InputEvent) -> void:
+	if portrait_blocked:
+		return
 	if settings_panel.visible:
 		return
 	if manual_open:
@@ -554,6 +624,8 @@ func _show_manual() -> void:
 	_refresh()
 
 func _pause() -> void:
+	if portrait_blocked:
+		return
 	if manual_open:
 		manual_open = false
 		if manual_was_playing and flight.status == FlightModel.Status.PAUSED:
@@ -565,14 +637,15 @@ func _pause() -> void:
 	_clear_controls()
 
 func _refresh() -> void:
+	_update_footer_layout()
 	radio_message.text = flight.message
 	radio_message.tooltip_text = flight.message
 	radio_bubble.custom_minimum_size.y = clampf(radio_message.get_minimum_size().y+20,52,100)
-	winch_button.text = "DEPLOY WINCH" if flight.winch == FlightModel.Winch.STOWED else "HOIST PATIENT" if flight.winch == FlightModel.Winch.READY_TO_HOIST else "CANCEL PICKUP" if flight.winch == FlightModel.Winch.LOWERING else "RETRIEVING..."
+	winch_button.text = "WINCH" if flight.winch == FlightModel.Winch.STOWED else ("HOIST" if footer_compact else "HOIST PATIENT") if flight.winch == FlightModel.Winch.READY_TO_HOIST else ("CANCEL" if footer_compact else "CANCEL PICKUP") if flight.winch == FlightModel.Winch.LOWERING else "RETRIEVING"
 	if flight.crew_index>=0:
 		winch_button.text="HELP / BOARD"
 	elif flight.can_disembark():
-		winch_button.text="SEND RESCUER"
+		winch_button.text="RESCUER" if footer_compact else "SEND RESCUER"
 	winch_button.disabled = flight.status not in [FlightModel.Status.READY, FlightModel.Status.PLAYING] or manual_open
 	pause_button.icon = _icon("play") if flight.status in [FlightModel.Status.READY,FlightModel.Status.PAUSED] else _icon("pause")
 	for action: String in control_buttons:

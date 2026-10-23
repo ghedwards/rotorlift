@@ -15,6 +15,7 @@ func run() -> void:
 	root.add_child(scene)
 	await process_frame
 	await process_frame
+	check(ProjectSettings.get_setting("display/window/handheld/orientation") == DisplayServer.SCREEN_SENSOR_LANDSCAPE, "Native app does not restrict play to landscape")
 	check(scene.flight.status == FlightModel.Status.READY, "Scene did not start ready")
 	check(scene.view.size.y > 0, "Flight viewport has no height")
 	check(scene.radio_message.text == scene.flight.message, "Footer radio message is missing")
@@ -26,6 +27,23 @@ func run() -> void:
 	scene._pause()
 	await process_frame
 	check(scene.overlay.visible, "Pause overlay was not shown")
+	scene._pause()
+	# Rotating to portrait must stop the flight and release both thumbs.
+	scene.held.left = true
+	scene._set_portrait_blocked(true)
+	check(scene.rotation_overlay.visible and scene.flight.status == FlightModel.Status.PAUSED, "Portrait did not block and pause flight")
+	check(not scene._control("left"), "Portrait retained a held flight input")
+	var paused_position: Vector2 = scene.flight.position
+	await create_timer(0.06).timeout
+	check(scene.flight.position == paused_position, "Flight moved while portrait was blocked")
+	scene._pause()
+	check(scene.flight.status == FlightModel.Status.PAUSED, "Portrait allowed flight to resume")
+	scene._set_portrait_blocked(false)
+	check(not scene.rotation_overlay.visible and scene.flight.status == FlightModel.Status.PLAYING, "Landscape did not restore the flight")
+	scene._pause()
+	scene._set_portrait_blocked(true)
+	scene._set_portrait_blocked(false)
+	check(scene.flight.status == FlightModel.Status.PAUSED, "Rotation resumed a manually paused flight")
 	scene._pause()
 	# Android Back must pause instead of exiting, and backgrounding releases inputs.
 	check(not scene.get_tree().quit_on_go_back, "Android Back still exits the game")

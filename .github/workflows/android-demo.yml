@@ -84,6 +84,8 @@ jobs:
           godot --headless --path godot --export-debug 'Android Demo' builds/android/airlift-demo.apk
           "$ANDROID_HOME/build-tools/36.0.0/apksigner" verify --verbose godot/builds/android/airlift-demo.apk
           "$ANDROID_HOME/build-tools/36.0.0/aapt" dump badging godot/builds/android/airlift-demo.apk | tee godot/builds/android/apk-info.txt
+          "$ANDROID_HOME/build-tools/36.0.0/aapt" dump xmltree godot/builds/android/airlift-demo.apk AndroidManifest.xml > godot/builds/android/manifest-info.txt
+          grep -Eq 'android:screenOrientation.*0x6$' godot/builds/android/manifest-info.txt
           cp godot/ANDROID-DEMO.md godot/builds/android/INSTALL.md
           cd godot/builds/android
           sha256sum airlift-demo.apk > SHA256SUMS.txt
