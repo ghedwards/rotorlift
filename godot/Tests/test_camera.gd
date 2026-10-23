@@ -29,7 +29,7 @@ func run() -> void:
 	check(absf(helicopter.x-view.size.x*0.5)<10,"Helicopter did not centre horizontally")
 	check(rotor.y>116+20,"Rotor disappeared behind the top bar")
 	check(helicopter.y>160 and helicopter.y<view.size.y-160,"Helicopter did not stay in the clear flight area")
-	for i in 5:
+	for i in flight.birds.size():
 		var bird := view.world_to_screen(flight.bird_position(i))
 		check(bird.y>128 and bird.y<view.size.y-40,"Bird near the helicopter is hidden by instruments")
 	# A long deployed line must remain visible along with its helicopter.
