@@ -36,7 +36,7 @@ Choose a fresh output directory for each packaging run. The script also produces
 - Refresh and confirm completed missions/assists persist. Private-browsing storage may not persist.
 - Report phone model, browser, mission and what happened, ideally with a short screen recording.
 
-Automated mobile viewport checks are not a substitute for physical phone performance and touch testing. Portrait layout is not yet a supported play mode. The footer's radio bubble can scroll when narrow.
+Automated mobile viewport checks are not a substitute for physical phone performance and touch testing. Portrait browser windows show a rotate prompt and pause flight; native Android stays in landscape. Controls overlay the game with a left joystick and a right rescue button; the top-bar menu contains pause, settings and the manual.
 
 ## Native Android demos
 

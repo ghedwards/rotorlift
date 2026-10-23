@@ -3,6 +3,7 @@ extends Control
 const Model = preload("res://Scripts/flight_model.gd")
 const View = preload("res://Scripts/flight_view.gd")
 const Hud = preload("res://Scripts/flight_hud.gd")
+const TouchControls = preload("res://Scripts/flight_controls.gd")
 const MONO = preload("res://Assets/Fonts/IBMPlexMono-Regular.ttf")
 const DISPLAY = preload("res://Assets/Fonts/BarlowCondensed-SemiBold.ttf")
 const SANS = preload("res://Assets/Fonts/DMSans.ttf")
@@ -17,14 +18,10 @@ var result_summary: Label
 var manual_open := false
 var manual_was_playing := false
 var overlay_tween: Tween
-var winch_button: Button
-var pause_button: Button
-var radio_message: Label
-var radio_bubble: Control
 var assist_checks: Array[CheckButton] = []
 var settings_panel: PopupPanel
 var settings_was_playing := false
-var assist_flags := [false,true,false]
+var assist_flags := [true,true,false]
 var mission_picker: OptionButton
 var overlay: PanelContainer
 var overlay_title: Label
@@ -33,19 +30,18 @@ var resume_button: Button
 var next_button: Button
 var muted := true
 var sound_button: Button
+var touch_controls: FlightControls
+var menu_button: Button
+var menu_panel: PopupPanel
+var menu_resume: Button
+var menu_was_playing := false
 var completed: Array = []
 var held := {"left": false, "right": false, "up": false, "down": false}
-var touch_actions: Dictionary = {}
-var control_buttons: Dictionary = {}
 var audio: AudioStreamPlayer
 var last_status := FlightModel.Status.READY
 var rotation_overlay: PanelContainer
 var portrait_blocked := false
 var portrait_was_playing := false
-var deck_controls: HBoxContainer
-var deck_utilities: HBoxContainer
-var deck_wordmark: Label
-var footer_compact := false
 
 func _ready() -> void:
 	missions = JSON.parse_string(FileAccess.get_file_as_string("res://Assets/missions.json"))
@@ -88,6 +84,8 @@ func _set_portrait_blocked(blocked: bool) -> void:
 	if flight == null:
 		return
 	if blocked:
+		if menu_panel.visible:
+			menu_panel.hide()
 		if settings_panel.visible:
 			settings_panel.hide()
 		portrait_was_playing = flight.status == FlightModel.Status.PLAYING
@@ -110,10 +108,6 @@ func _build_rotation_prompt() -> void:
 	content.add_theme_constant_override("separation",24)
 	content.custom_minimum_size.x = 560
 	center.add_child(content)
-	var brand := _label("AIRLIFT.",56)
-	brand.add_theme_font_override("font",DISPLAY)
-	brand.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	content.add_child(brand)
 	var title := _label("Turn your phone\nsideways to fly.",48)
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	content.add_child(title)
@@ -121,17 +115,6 @@ func _build_rotation_prompt() -> void:
 	copy.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	copy.add_theme_color_override("font_color",Color("bbc6b0"))
 	content.add_child(copy)
-
-func _update_footer_layout() -> void:
-	var compact := get_viewport_rect().size.x < 1300
-	if deck_controls == null or compact == footer_compact:
-		return
-	footer_compact = compact
-	deck_controls.add_theme_constant_override("separation",24 if compact else 32)
-	deck_wordmark.add_theme_font_size_override("font_size",44 if compact else 52)
-	for button: Button in deck_utilities.get_children():
-		button.custom_minimum_size = Vector2.ONE * (56 if compact else 64)
-	winch_button.custom_minimum_size.x = 152 if compact else 176
 
 func _setup_actions() -> void:
 	var keys := {"left": [KEY_A, KEY_LEFT], "right": [KEY_D, KEY_RIGHT], "up": [KEY_W, KEY_UP], "down": [KEY_S, KEY_DOWN], "winch": [KEY_SPACE, KEY_E], "pause": [KEY_P, KEY_ESCAPE], "restart": [KEY_R], "fullscreen": [KEY_F11]}
@@ -221,14 +204,9 @@ func _button(text: String, callback: Callable) -> Button:
 	return button
 
 func _build_ui() -> void:
-	var layout := VBoxContainer.new()
-	layout.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	layout.add_theme_constant_override("separation", 0)
-	add_child(layout)
 	var scene := Control.new()
-	scene.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	scene.custom_minimum_size.y = 240
-	layout.add_child(scene)
+	scene.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	add_child(scene)
 	view = View.new()
 	view.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	scene.add_child(view)
@@ -236,8 +214,9 @@ func _build_ui() -> void:
 	hud.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	scene.add_child(hud)
 	_build_overlay(scene)
-	_build_flight_deck(layout)
+	_build_touch_controls()
 	_build_settings()
+	_build_menu()
 	audio = AudioStreamPlayer.new()
 	add_child(audio)
 	_build_rotation_prompt()
@@ -269,7 +248,7 @@ func _build_overlay(scene: Control) -> void:
 	overlay_title.add_theme_font_override("font",DISPLAY)
 	overlay_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	dialog.add_child(overlay_title)
-	overlay_copy = _label("",14)
+	overlay_copy = _label("",20)
 	overlay_copy.add_theme_color_override("font_color",Color("b7c0ab"))
 	overlay_copy.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	overlay_copy.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -279,6 +258,7 @@ func _build_overlay(scene: Control) -> void:
 	result_summary.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	dialog.add_child(result_summary)
 	resume_button = _primary(_button("Resume flight   [P]",_pause))
+	resume_button.add_theme_font_size_override("font_size",22)
 	resume_button.icon = _icon("play")
 	resume_button.add_theme_constant_override("icon_max_width",16)
 	resume_button.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
@@ -295,125 +275,79 @@ func _build_overlay(scene: Control) -> void:
 	restart.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	dialog.add_child(restart)
 
-func _build_flight_deck(layout: VBoxContainer) -> void:
-	var panel := PanelContainer.new()
-	var deck_style := _style(Color("1e251c"),Color("343d2c"),0)
-	deck_style.set_corner_radius_all(0)
-	deck_style.set_border_width_all(0)
-	deck_style.border_width_top = 1
-	panel.add_theme_stylebox_override("panel",deck_style)
-	layout.add_child(panel)
-	deck_style.content_margin_top = 0
-	deck_style.content_margin_bottom = 0
-	var margin := _margin(32,24,32,24)
-	panel.add_child(margin)
-	var controls := HBoxContainer.new()
-	deck_controls = controls
-	controls.add_theme_constant_override("separation",32)
-	var deck := VBoxContainer.new()
-	deck.add_theme_constant_override("separation",12)
-	margin.add_child(deck)
-	deck.add_child(controls)
-	radio_bubble = Control.new()
-	radio_bubble.custom_minimum_size.y = 52
-	radio_bubble.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	radio_bubble.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	var bubble_panel := PanelContainer.new()
-	bubble_panel.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	var bubble_style := _style(Color("192c28"),Color.TRANSPARENT,14)
-	bubble_style.set_corner_radius_all(12)
-	bubble_style.set_border_width_all(0)
-	bubble_panel.add_theme_stylebox_override("panel",bubble_style)
-	radio_bubble.add_child(bubble_panel)
-	var scroll := ScrollContainer.new()
-	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-	bubble_panel.add_child(scroll)
-	radio_message = _label("",16)
-	radio_message.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	radio_message.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	radio_message.add_theme_color_override("font_color",Color("eeedcf"))
-	scroll.add_child(radio_message)
-	var tail := TextureRect.new()
-	tail.texture = load("res://Assets/Art/radio-bubble-tail.svg")
-	tail.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	tail.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_LEFT)
-	tail.position = Vector2(18,-1)
-	tail.size = Vector2(18,12)
-	radio_bubble.add_child(tail)
-	# Steering and altitude sit at opposite thumb positions; utility controls stay central.
-	var steering := HBoxContainer.new()
-	steering.add_theme_constant_override("separation",24)
-	controls.add_child(steering)
-	for definition: Array in [["left","A","left"],["right","D","right"]]:
-		steering.add_child(_flight_button(definition[0],definition[1],definition[2],Vector2(100,100)))
-	var center := HBoxContainer.new()
-	center.alignment = BoxContainer.ALIGNMENT_CENTER
-	center.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	center.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	center.add_theme_constant_override("separation",12)
-	controls.add_child(center)
-	controls.move_child(center,1)
-	center.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	center.alignment = BoxContainer.ALIGNMENT_BEGIN
-	var brand := VBoxContainer.new()
-	brand.alignment = BoxContainer.ALIGNMENT_CENTER
-	brand.add_theme_constant_override("separation",0)
-	center.add_child(brand)
-	var wordmark := _label("AIRLIFT.",52)
-	deck_wordmark = wordmark
-	wordmark.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	wordmark.add_theme_font_override("font",DISPLAY)
-	brand.add_child(wordmark)
-	var utilities := HBoxContainer.new()
-	deck_utilities = utilities
-	utilities.alignment = BoxContainer.ALIGNMENT_CENTER
-	utilities.add_theme_constant_override("separation",4)
-	brand.add_child(utilities)
-	for definition: Array in [["info","Flight manual (pauses flight)"],["settings","Settings"],["expand","Fullscreen (F11)"],["pause","Start / pause / resume (P)"]]:
-		var callback := _show_manual if definition[0]=="info" else _show_settings if definition[0]=="settings" else _pause if definition[0]=="pause" else _toggle_fullscreen
-		var button := _button("",callback)
-		button.icon = _icon(definition[0])
-		button.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		button.expand_icon = true
-		for state in ["normal","hover","pressed","focus","disabled"]:
-			button.add_theme_stylebox_override(state,_style(Color.TRANSPARENT,Color.TRANSPARENT,12))
-		button.add_theme_color_override("icon_normal_color",Color("dce4cd"))
-		button.add_theme_color_override("icon_hover_color",Color("ffffff"))
-		button.add_theme_color_override("icon_pressed_color",ORANGE)
-		button.add_theme_constant_override("icon_max_width",26)
-		button.custom_minimum_size = Vector2(64,64)
-		button.tooltip_text = definition[1]
-		utilities.add_child(button)
-		if definition[0]=="pause":
-			pause_button = button
-	center.add_child(radio_bubble)
-	winch_button = _button("WINCH",func(): flight.toggle_winch())
-	winch_button.icon = null
-	winch_button.add_theme_constant_override("icon_max_width",24)
-	winch_button.add_theme_font_size_override("font_size",18)
-	winch_button.custom_minimum_size = Vector2(176,100)
-	_touch_style(winch_button,true)
-	for text_state in ["font_color","font_hover_color","font_pressed_color","font_focus_color"]:
-		winch_button.add_theme_color_override(text_state,Color("e2e8cf"))
-	var winch_hint := _label("SPACE",14)
-	winch_hint.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	winch_hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-	winch_hint.add_theme_color_override("font_color",Color("a8b69c"))
-	winch_hint.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE)
-	winch_hint.offset_left = 12
-	winch_hint.offset_right = -8
-	winch_hint.offset_top = -25
-	winch_hint.offset_bottom = -5
-	winch_button.add_child(winch_hint)
-	winch_button.tooltip_text = "Rescue / interact (Space)"
-	controls.add_child(winch_button)
-	var altitude := HBoxContainer.new()
-	altitude.add_theme_constant_override("separation",24)
-	controls.add_child(altitude)
-	for definition: Array in [["down","S","down"],["up","W","up"]]:
-		var button := _flight_button(definition[0],definition[1],definition[2],Vector2(100,100))
-		button.tooltip_text = "Hold to descend" if definition[0]=="down" else "Hold to climb"
-		altitude.add_child(button)
+func _build_touch_controls() -> void:
+	touch_controls = TouchControls.new()
+	touch_controls.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	touch_controls.winch_pressed.connect(func(): flight.toggle_winch())
+	add_child(touch_controls)
+	menu_button = _flat(_button("",_show_menu))
+	menu_button.icon = _icon("menu")
+	menu_button.expand_icon = true
+	menu_button.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	menu_button.add_theme_constant_override("icon_max_width",32)
+	menu_button.set_anchors_and_offsets_preset(Control.PRESET_TOP_RIGHT)
+	menu_button.offset_left = -106
+	menu_button.offset_right = -30
+	menu_button.offset_top = 24
+	menu_button.offset_bottom = 104
+	menu_button.tooltip_text = "Flight menu / pause"
+	add_child(menu_button)
+
+func _build_menu() -> void:
+	menu_panel = PopupPanel.new()
+	menu_panel.add_theme_stylebox_override("panel",_style(Color("192c28"),Color("43564a"),24))
+	add_child(menu_panel)
+	var content := VBoxContainer.new()
+	content.custom_minimum_size.x = 360
+	content.add_theme_constant_override("separation",8)
+	menu_panel.add_child(content)
+	content.add_child(_label("Flight menu",26))
+	menu_resume = _primary(_button("Resume flight",func():
+		menu_was_playing = false
+		menu_panel.hide()
+		if flight.status in [FlightModel.Status.READY,FlightModel.Status.PAUSED]:
+			_pause()))
+	menu_resume.add_theme_font_size_override("font_size",22)
+	menu_resume.icon = _icon("play")
+	menu_resume.custom_minimum_size.y = 64
+	content.add_child(menu_resume)
+	for definition in [["settings","Settings"],["info","Flight manual"],["expand","Fullscreen"]]:
+		var action: String = definition[0]
+		var button := _button(definition[1],func(): _menu_action(action))
+		button.add_theme_font_size_override("font_size",22)
+		button.icon = _icon(action)
+		button.add_theme_constant_override("icon_max_width",24)
+		button.custom_minimum_size.y = 64
+		content.add_child(button)
+	menu_panel.popup_hide.connect(func():
+		_clear_controls()
+		if menu_was_playing and flight.status == FlightModel.Status.PAUSED:
+			flight.toggle_pause()
+		menu_was_playing = false
+		_refresh())
+
+func _show_menu() -> void:
+	menu_was_playing = flight.status == FlightModel.Status.PLAYING
+	if menu_was_playing:
+		flight.toggle_pause()
+	_clear_controls()
+	menu_resume.text = "Start flight" if flight.status == FlightModel.Status.READY else "Resume flight" if flight.status == FlightModel.Status.PAUSED else "Back to mission"
+	menu_panel.popup_centered()
+	_refresh()
+
+func _menu_action(action: String) -> void:
+	if action == "expand":
+		_toggle_fullscreen()
+		return
+	var resume_after := menu_was_playing
+	menu_was_playing = false
+	menu_panel.hide()
+	if action == "settings":
+		_show_settings()
+		settings_was_playing = resume_after
+	else:
+		_show_manual()
+		manual_was_playing = resume_after
 
 func _build_settings() -> void:
 	settings_panel = PopupPanel.new()
@@ -466,49 +400,6 @@ func _show_settings() -> void:
 	settings_panel.popup_centered()
 	_refresh()
 
-func _touch_style(button: Button, accent := false) -> void:
-	button.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	button.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	button.expand_icon = true
-	button.add_theme_constant_override("h_separation",12)
-	button.add_theme_constant_override("icon_max_width",28)
-	for state in ["normal","hover","pressed","disabled","focus"]:
-		var background := Color("35473b") if accent else Color("29372e")
-		if state == "pressed":
-			background = Color("54664b")
-		elif state == "hover":
-			background = background.lightened(0.08)
-		var style := _style(background,Color("8caa76") if accent else Color("52634d"),12)
-		style.content_margin_top = 12
-		style.content_margin_bottom = 12
-		style.set_corner_radius_all(10)
-		button.add_theme_stylebox_override(state,style)
-	button.add_theme_color_override("font_color",Color("f0f0df"))
-	button.add_theme_color_override("icon_normal_color",Color("e2e8cf"))
-
-func _flight_button(action: String, text: String, icon_name: String, minimum: Vector2) -> Button:
-	var button := Button.new()
-	button.text = ""
-	button.tooltip_text = text
-	var key_hint := _label(text,14)
-	key_hint.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	key_hint.add_theme_color_override("font_color",Color("a8b69c"))
-	key_hint.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_RIGHT)
-	key_hint.position = Vector2(-24,-25)
-	key_hint.size = Vector2(16,20)
-	button.add_child(key_hint)
-	button.icon = _icon(icon_name)
-	button.add_theme_constant_override("icon_max_width",28)
-	button.add_theme_font_override("font",MONO)
-	button.add_theme_font_size_override("font_size",18)
-	button.focus_mode = Control.FOCUS_NONE
-	button.custom_minimum_size = minimum
-	button.button_down.connect(func(): held[action] = true)
-	button.button_up.connect(func(): held[action] = false)
-	_touch_style(button)
-	control_buttons[action] = button
-	return button
-
 func _toggle_assist(index: int) -> void:
 	assist_flags[index]=not assist_flags[index]
 	assist_checks[index].set_pressed_no_signal(assist_flags[index])
@@ -528,7 +419,7 @@ func _select_mission(index: int) -> void:
 	flight.cue.connect(_play_cue)
 	view.flight = flight
 	hud.flight = flight
-	view.camera_x = 0
+	view.reset_camera()
 	view.backdrop = load("res://Assets/" + String(missions[index].image).get_file())
 	last_status = FlightModel.Status.READY
 	_clear_controls()
@@ -537,9 +428,10 @@ func _select_mission(index: int) -> void:
 func _process(dt: float) -> void:
 	if flight == null:
 		return
-	var steer := float(_control("right")) - float(_control("left"))
-	if not portrait_blocked and not manual_open and not settings_panel.visible:
-		flight.step(minf(dt, 0.04), steer, _control("up"), _control("down"))
+	var steer := clampf(float(_control("right"))-float(_control("left"))+touch_controls.stick.x,-1,1)
+	var vertical := -1.0 if _control("up") else 1.0 if _control("down") else touch_controls.stick.y
+	if not portrait_blocked and not manual_open and not settings_panel.visible and not menu_panel.visible:
+		flight.step(minf(dt,0.04),steer,_control("up"),_control("down"),vertical)
 	if flight.status == FlightModel.Status.COMPLETE and last_status != flight.status:
 		var id: String = flight.mission.id
 		if not completed.has(id):
@@ -553,27 +445,14 @@ func _process(dt: float) -> void:
 	_refresh()
 
 func _control(action: String) -> bool:
-	return not portrait_blocked and (bool(held[action]) or Input.is_action_pressed("flight_" + action) or touch_actions.values().has(action))
-
-func _input(event: InputEvent) -> void:
-	if portrait_blocked or manual_open or settings_panel.visible:
-		return
-	# Track each finger independently so throttle and steering work together.
-	if event is InputEventScreenTouch:
-		if event.pressed:
-			for action: String in control_buttons:
-				if not control_buttons[action].disabled and control_buttons[action].get_global_rect().has_point(event.position):
-					touch_actions[event.index] = action
-		else:
-			touch_actions.erase(event.index)
-	elif event is InputEventScreenDrag:
-		touch_actions.erase(event.index)
-		for action: String in control_buttons:
-			if not control_buttons[action].disabled and control_buttons[action].get_global_rect().has_point(event.position):
-				touch_actions[event.index] = action
+	return not portrait_blocked and (bool(held[action]) or Input.is_action_pressed("flight_" + action))
 
 func _unhandled_key_input(event: InputEvent) -> void:
 	if portrait_blocked:
+		return
+	if menu_panel.visible:
+		if event.is_action_pressed("flight_pause"):
+			menu_panel.hide()
 		return
 	if settings_panel.visible:
 		return
@@ -595,12 +474,15 @@ func _unhandled_key_input(event: InputEvent) -> void:
 func _clear_controls() -> void:
 	for action: String in held:
 		held[action] = false
-	touch_actions.clear()
+	if touch_controls != null:
+		touch_controls.reset()
 
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_WM_GO_BACK_REQUEST and flight != null:
 		_clear_controls()
-		if settings_panel != null and settings_panel.visible:
+		if menu_panel != null and menu_panel.visible:
+			menu_panel.hide()
+		elif settings_panel != null and settings_panel.visible:
 			settings_panel.hide()
 		elif flight.status != FlightModel.Status.READY or manual_open:
 			_pause()
@@ -637,21 +519,16 @@ func _pause() -> void:
 	_clear_controls()
 
 func _refresh() -> void:
-	_update_footer_layout()
-	radio_message.text = flight.message
-	radio_message.tooltip_text = flight.message
-	radio_bubble.custom_minimum_size.y = clampf(radio_message.get_minimum_size().y+20,52,100)
-	winch_button.text = "WINCH" if flight.winch == FlightModel.Winch.STOWED else ("HOIST" if footer_compact else "HOIST PATIENT") if flight.winch == FlightModel.Winch.READY_TO_HOIST else ("CANCEL" if footer_compact else "CANCEL PICKUP") if flight.winch == FlightModel.Winch.LOWERING else "RETRIEVING"
-	if flight.crew_index>=0:
-		winch_button.text="HELP / BOARD"
-	elif flight.can_disembark():
-		winch_button.text="RESCUER" if footer_compact else "SEND RESCUER"
-	winch_button.disabled = flight.status not in [FlightModel.Status.READY, FlightModel.Status.PLAYING] or manual_open
-	pause_button.icon = _icon("play") if flight.status in [FlightModel.Status.READY,FlightModel.Status.PAUSED] else _icon("pause")
-	for action: String in control_buttons:
-		control_buttons[action].set_pressed_no_signal(_control(action))
-		control_buttons[action].disabled=flight.crew_index>=0 and action in ["up","down"]
-	var show_overlay := not settings_panel.visible and (manual_open or flight.status in [FlightModel.Status.PAUSED,FlightModel.Status.FAILED,FlightModel.Status.COMPLETE])
+	var can_control := not portrait_blocked and not manual_open and not settings_panel.visible and not menu_panel.visible and flight.status in [FlightModel.Status.READY,FlightModel.Status.PLAYING]
+	touch_controls.set_enabled(can_control)
+	touch_controls.visible = can_control
+	touch_controls.vertical_enabled = flight.crew_index < 0
+	touch_controls.winch_active = flight.winch != FlightModel.Winch.STOWED or flight.crew_index >= 0
+	touch_controls.winch_icon = _icon("up") if flight.winch in [FlightModel.Winch.READY_TO_HOIST,FlightModel.Winch.RETRIEVING] else _icon("rescue-cross")
+	touch_controls.winch_description = "Help / board" if flight.crew_index >= 0 else "Send rescuer" if flight.can_disembark() else "Hoist patient" if flight.winch == FlightModel.Winch.READY_TO_HOIST else "Cancel pickup" if flight.winch == FlightModel.Winch.LOWERING else "Deploy winch"
+	touch_controls.queue_redraw()
+	menu_button.disabled = portrait_blocked or manual_open or settings_panel.visible
+	var show_overlay := not settings_panel.visible and not menu_panel.visible and (manual_open or flight.status in [FlightModel.Status.PAUSED,FlightModel.Status.FAILED,FlightModel.Status.COMPLETE])
 	if show_overlay and not overlay.visible:
 		overlay.modulate.a = 0
 		if overlay_tween:
@@ -667,7 +544,7 @@ func _refresh() -> void:
 		if manual_open:
 			overlay_kicker.text = "A LITTLE COURAGE. A LOT OF LIFT."
 			overlay_title.text = "Be their lifeline."
-			overlay_copy.text = "A / D: accelerate or brake. W / S: climb or descend.\nSettings: altitude hold, ground tether and auto-hoist are independent.\n\nWINCH: Space lowers the rescue crew. Keep the hook in the circle while it fills.\nWith tether on, the ground end anchors; excess tension or slack releases it.\nSpace hoists the loaded stretcher, unless auto-hoist is enabled.\n\nLANDING: land at a green LZ, then Space to control the rescuer.\nA / D to walk. Space near the survivor to help; return and Space to board.\n\nBring everyone home to the base helipad. Land at base to refuel."
+			overlay_copy.text = "LEFT STICK: steer and control altitude. Push gently for fine movement.\nRelease preserves momentum; opposite input brakes. Keyboard: WASD / arrows.\nSettings: altitude hold, ground tether and auto-hoist are independent.\n\nWINCH BUTTON / Space: lower the rescue crew. Keep the hook in the circle while it fills.\nWith tether on, the ground end anchors; excess tension or slack releases it.\nTap the up arrow or press Space to hoist, unless auto-hoist is enabled.\n\nLANDING: land at a green LZ, then tap the rescue cross to send the rescuer.\nUse the stick to walk. Tap near the survivor to help; return and tap to board.\n\nBring everyone home to the base helipad. Land at base to refuel."
 		else:
 			overlay_kicker.text = "TAKE A BREATHER, PILOT." if flight.status == FlightModel.Status.PAUSED else "MISSION ACCOMPLISHED" if flight.status == FlightModel.Status.COMPLETE else "MISSION INCOMPLETE"
 			overlay_title.text = "Holding position." if flight.status == FlightModel.Status.PAUSED else "Everyone. Home safe." if flight.status == FlightModel.Status.COMPLETE else "A second chance to fly."

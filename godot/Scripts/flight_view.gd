@@ -32,7 +32,12 @@ const SANS = preload("res://Assets/Fonts/DMSans.ttf")
 var world_labels: Array[Dictionary] = []
 var flight: FlightModel
 var backdrop: Texture2D
+const WORLD_HEIGHT := 760.0
+const SAFE_TOP := 128.0
 var camera_x := 0.0
+var camera_y := 0.0
+var camera_initialized := false
+var camera_view_size := Vector2.ZERO
 var world_width := 1440.0
 var grading: GradientTexture2D
 
@@ -60,10 +65,43 @@ func _process(dt: float) -> void:
 	if flight == null or size.y <= 0:
 		return
 	_update_character_animation()
-	world_width = size.x * 760 / size.y
-	var target := clampf(flight.position.x - world_width * 0.37, 0, maxf(0, float(flight.mission.width) - world_width))
-	camera_x = lerpf(camera_x, target, minf(1, dt * 3.4))
+	_update_camera(dt)
 	queue_redraw()
+
+func reset_camera() -> void:
+	camera_initialized = false
+	camera_x = 0
+	camera_y = 0
+
+func world_scale() -> float:
+	return size.y / WORLD_HEIGHT
+
+func world_to_screen(point: Vector2) -> Vector2:
+	return (point-Vector2(camera_x,camera_y))*world_scale()
+
+func _update_camera(dt: float) -> void:
+	if size.y <= 0:
+		return
+	if camera_view_size != size:
+		camera_initialized = false
+		camera_view_size = size
+	world_width = size.x / world_scale()
+	var target_x := clampf(flight.position.x-world_width*0.5,0,maxf(0,float(flight.mission.width)-world_width))
+	# Centre flight below the instruments. A deployed rig gets space beneath it.
+	var focus_y := flight.position.y
+	if flight.cable > 0:
+		focus_y = lerpf(focus_y,maxf(focus_y,flight.rig_position().y+36),0.35)
+	var screen_center := SAFE_TOP+(size.y-SAFE_TOP)*0.44
+	var target_y := clampf(focus_y-screen_center/world_scale(),-480,190)
+	if not camera_initialized:
+		camera_x = target_x
+		camera_y = target_y
+		camera_initialized = true
+	elif flight.status != FlightModel.Status.PAUSED:
+		var blend := 1-exp(-3.4*dt)
+		camera_x = lerpf(camera_x,target_x,blend)
+		camera_y = lerpf(camera_y,target_y,blend)
+
 
 func _update_character_animation() -> void:
 	if flight.crew_index != previous_crew_index or flight.clock < previous_clock:
@@ -89,8 +127,8 @@ func _draw_character(p: Vector2, animation: String, phase: float, facing := 1) -
 	draw_texture_rect(character_frames[animation][frame],destination,false)
 
 func _world_transform() -> void:
-	var factor := size.y / 760.0
-	draw_set_transform(Vector2(-camera_x * factor, 0), 0, Vector2.ONE * factor)
+	var factor := world_scale()
+	draw_set_transform(-Vector2(camera_x,camera_y)*factor,0,Vector2.ONE*factor)
 
 func _draw() -> void:
 	if flight == null or size.y <= 0:
@@ -103,7 +141,9 @@ func _draw() -> void:
 		var image_width := image_size.x * factor
 		var travel := maxf(0, image_width - size.x)
 		var progress := camera_x / maxf(1, float(flight.mission.width) - world_width)
-		draw_texture_rect(backdrop, Rect2(Vector2(-travel * progress, 0), image_size * factor), false, Color(0.91, 0.94, 0.88))
+		var vertical_travel := maxf(0,image_size.y*factor-size.y)
+		var image_y := -clampf(vertical_travel*0.5+camera_y*0.15,0,vertical_travel)
+		draw_texture_rect(backdrop,Rect2(Vector2(-travel*progress,image_y),image_size*factor),false,Color(0.91,0.94,0.88))
 	# A soft upper wash and lower shade reproduce the original canvas grading.
 	draw_texture_rect(grading,Rect2(Vector2.ZERO,size),false)
 	_world_transform()
@@ -127,11 +167,10 @@ func _world_label(point: Vector2, text: String, tint: Color = CREAM) -> void:
 	world_labels.append({"point":point,"text":text,"tint":tint})
 
 func _draw_world_labels() -> void:
-	var factor := size.y / 760.0
 	var occupied: Array[Rect2] = []
 	for label: Dictionary in world_labels:
-		var point: Vector2 = (label.point - Vector2(camera_x,0)) * factor
-		if point.x < 0 or point.x > size.x:
+		var point: Vector2 = world_to_screen(label.point)
+		if point.x < 0 or point.x > size.x or point.y < SAFE_TOP or point.y > size.y+40:
 			continue
 		var extent := SANS.get_string_size(label.text,HORIZONTAL_ALIGNMENT_LEFT,-1,16)
 		var rect := Rect2(point-Vector2(extent.x/2+10,17),Vector2(extent.x+20,34))
@@ -139,7 +178,8 @@ func _draw_world_labels() -> void:
 		rect.position.y = maxf(126,rect.position.y)
 		for previous: Rect2 in occupied:
 			if rect.intersects(previous.grow(4)):
-				rect.position.y = previous.position.y-rect.size.y-6
+				var above := previous.position.y-rect.size.y-6
+				rect.position.y = above if above >= SAFE_TOP else previous.end.y+6
 		occupied.append(rect)
 		var box := StyleBoxFlat.new()
 		box.bg_color = Color("192c2c")
@@ -386,11 +426,11 @@ func _draw_rescue_rig(hook: Vector2) -> void:
 
 func _draw_helicopter() -> void:
 	var p := flight.position
-	var factor := size.y / 760.0
+	var factor := world_scale()
 	# Soft ground shadow gives the aircraft height without changing its silhouette.
 	var altitude := flight.ground(p.x) - p.y
 	_ellipse(Vector2(p.x + 12, flight.ground(p.x) + 8), Vector2(66, 7), Color(0.03, 0.08, 0.07, clampf(0.23 - altitude * 0.0004, 0.02, 0.2)))
-	draw_set_transform(Vector2((p.x - camera_x) * factor, p.y * factor), flight.velocity.x * 0.00045, Vector2(flight.facing, 1) * factor)
+	draw_set_transform(world_to_screen(p), flight.velocity.x * 0.00045, Vector2(flight.facing, 1) * factor)
 	draw_texture_rect(HELICOPTER_FLASH if flight.invincible > 0 and int(flight.clock * 12) % 2 == 0 else HELICOPTER_BODY,Rect2(-190,-80,290,135),false)
 	var rotor_center := Vector2(-155, -29)
 	var tail_angle := flight.clock * 33
@@ -406,8 +446,6 @@ func _draw_helicopter() -> void:
 	draw_line(Vector2(-7-length,-70-sin(flight.clock*28)*2),Vector2(-7+length,-70+sin(flight.clock*28)*2),Color(0.16,0.22,0.19,0.85),3,true)
 	draw_circle(Vector2(-146,-61),2.5,Color("f2a674") if sin(flight.clock*5)>0.5 else Color("a64e2d"))
 	_world_transform()
-	if flight.status == FlightModel.Status.READY:
-		_world_label(p+Vector2(165,-110),"Hold W to climb")
 
 func _draw_birds() -> void:
 	for i in 5:

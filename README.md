@@ -6,7 +6,7 @@ A Godot 4.7.2 / GDScript helicopter rescue game with three extended missions, mo
 
 Browser release: **https://ghedwards.github.io/rotorlift/** (available once the Pages deployment succeeds).
 
-Open it on a computer or a phone held in landscape. Computers use WASD/arrows and Space; phones use the on-screen controls. The info icon opens the flight manual; the cog contains sound, mission selection and independent difficulty assists. A browser supporting WebGL 2 and WebAssembly is required. Real iPhone/Android device testing is still needed; desktop and emulated landscape-phone checks have passed.
+Open it on a computer or a phone held in landscape. Computers use WASD/arrows and Space; phones use the on-screen controls. The top-bar menu pauses the game and opens the flight manual, settings and fullscreen. A translucent left joystick controls movement; the round rescue button on the right works the winch and ground rescues. A browser supporting WebGL 2 and WebAssembly is required. Real iPhone/Android device testing is still needed; desktop and emulated landscape-phone checks have passed.
 
 ## Run locally
 

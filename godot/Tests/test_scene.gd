@@ -18,7 +18,7 @@ func run() -> void:
 	check(ProjectSettings.get_setting("display/window/handheld/orientation") == DisplayServer.SCREEN_SENSOR_LANDSCAPE, "Native app does not restrict play to landscape")
 	check(scene.flight.status == FlightModel.Status.READY, "Scene did not start ready")
 	check(scene.view.size.y > 0, "Flight viewport has no height")
-	check(scene.radio_message.text == scene.flight.message, "Footer radio message is missing")
+	check(scene.view.size == scene.size, "Game does not fill the screen")
 	Input.action_press("flight_up")
 	await physics_frame
 	await process_frame
@@ -65,25 +65,60 @@ func run() -> void:
 	scene._notification(Node.NOTIFICATION_WM_GO_BACK_REQUEST)
 	check(not scene.settings_panel.visible, "Android Back did not close settings")
 	check(scene.flight.status == FlightModel.Status.PLAYING, "Settings did not restore flight")
-	for button in scene.control_buttons.values():
-		check(button.size.x >= 100 and button.size.y >= 100, "Mobile flight target is too small")
+	# One finger owns the stick while another operates the winch.
+	var controls: FlightControls = scene.touch_controls
 	var left_touch := InputEventScreenTouch.new()
 	left_touch.index = 0
 	left_touch.pressed = true
-	left_touch.position = scene.control_buttons.left.get_global_rect().get_center()
-	scene._input(left_touch)
-	var up_touch := InputEventScreenTouch.new()
-	up_touch.index = 1
-	up_touch.pressed = true
-	up_touch.position = scene.control_buttons.up.get_global_rect().get_center()
-	scene._input(up_touch)
-	check(scene._control("left") and scene._control("up"), "Independent thumbs cannot steer and climb together")
+	left_touch.position = controls.joystick_center()
+	controls.handle_event(left_touch)
+	var small_drag := InputEventScreenDrag.new()
+	small_drag.index = 0
+	small_drag.position = controls.joystick_center()+Vector2(3,2)
+	controls.handle_event(small_drag)
+	check(controls.stick == Vector2.ZERO,"Joystick dead zone allowed accidental movement")
+	var drag := InputEventScreenDrag.new()
+	drag.index = 0
+	drag.position = controls.joystick_center()+Vector2(30,-30)
+	controls.handle_event(drag)
+	check(controls.stick.x>0 and controls.stick.y<0, "Joystick cannot steer and climb diagonally")
+	var before_winch := controls.stick
+	var winch_touch := InputEventScreenTouch.new()
+	winch_touch.index = 1
+	winch_touch.pressed = true
+	winch_touch.position = controls.winch_center()
+	controls.handle_event(winch_touch)
+	check(scene.flight.winch == FlightModel.Winch.LOWERING, "Second thumb did not deploy winch")
+	check(controls.stick == before_winch, "Winch touch changed the joystick")
+	var emulated_mouse := InputEventMouseButton.new()
+	emulated_mouse.device = -1
+	emulated_mouse.button_index = MOUSE_BUTTON_LEFT
+	emulated_mouse.pressed = true
+	emulated_mouse.position = winch_touch.position
+	controls.handle_event(emulated_mouse)
+	check(scene.flight.winch == FlightModel.Winch.LOWERING, "Emulated mouse duplicated a touch action")
+	winch_touch.pressed = false
+	controls.handle_event(winch_touch)
+	check(controls.stick == before_winch, "Releasing winch cancelled steering")
 	left_touch.pressed = false
-	scene._input(left_touch)
-	check(not scene._control("left") and scene._control("up"), "Releasing one thumb cancelled the other")
-	scene._clear_controls()
-	scene.flight.toggle_winch()
-	check(scene.flight.winch == FlightModel.Winch.LOWERING, "Winch did not deploy")
+	controls.handle_event(left_touch)
+	check(controls.stick == Vector2.ZERO, "Releasing stick retained input")
+	# Opening the top menu pauses and drops every active pointer.
+	left_touch.pressed = true
+	controls.handle_event(left_touch)
+	controls.handle_event(drag)
+	scene._show_menu()
+	check(scene.flight.status == FlightModel.Status.PAUSED and controls.stick == Vector2.ZERO, "Menu did not pause and release joystick")
+	check(not controls.enabled and scene.menu_panel.visible, "Menu did not block game controls")
+	scene._menu_action("settings")
+	check(scene.settings_panel.visible and scene.flight.status == FlightModel.Status.PAUSED, "Menu settings resumed flight")
+	scene.settings_panel.hide()
+	check(scene.flight.status == FlightModel.Status.PLAYING, "Closing menu settings lost resume state")
+	scene._show_menu()
+	scene._menu_action("info")
+	check(scene.manual_open and scene.flight.status == FlightModel.Status.PAUSED, "Menu manual did not pause")
+	scene._pause()
+	check(scene.flight.status == FlightModel.Status.PLAYING, "Closing menu manual lost resume state")
 	scene._select_mission(1)
 	check(scene.flight.mission.name == "Storm Coast", "Mission selector did not change mission")
 	scene._select_mission(0)

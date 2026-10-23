@@ -48,7 +48,7 @@ func _draw() -> void:
 	# Transparent shading leaves the landscape visible while protecting legibility.
 	draw_texture_rect(upper_shade,Rect2(0,0,size.x,170),false)
 	_draw_top_panel()
-	draw_line(Vector2(size.x-312,24),Vector2(size.x-312,104),Color("43564a"),1)
+	draw_line(Vector2(size.x-408,24),Vector2(size.x-408,104),Color("43564a"),1)
 	if flight.winch != FlightModel.Winch.STOWED or flight.cable > 0 or flight.overload_warning > 0:
 		_draw_tension()
 	else:
@@ -72,9 +72,9 @@ func _draw_top_panel() -> void:
 	_text(Vector2(51,39),status,18,CREAM)
 	var location := "%s / %s" % [flight.mission.name,String(flight.mission.region).capitalize()]
 	var location_width := SANS.get_string_size(location,HORIZONTAL_ALIGNMENT_LEFT,-1,18).x
-	_text(Vector2(size.x-332-location_width,39),location,18,CREAM)
-	draw_line(Vector2(34,50),Vector2(size.x-332,50),Color("43564a"),1)
-	var column_width := (size.x-376)/7.0
+	_text(Vector2(size.x-428-location_width,39),location,18,CREAM)
+	draw_line(Vector2(34,50),Vector2(size.x-428,50),Color("43564a"),1)
+	var column_width := (size.x-472)/7.0
 	var values := ["%02d / %02d" % [flight.rescued,flight.targets.size()],"%d%%" % ceili(flight.fuel),"", "%d ft" % maxi(0,int((flight.ground(flight.position.x)-flight.position.y-48)*0.7)),"%d kts" % int(absf(flight.velocity.x)*0.3),"%02d:%02d" % [int(flight.elapsed)/60,int(flight.elapsed)%60],"%s %02d kts" % ["→" if flight.wind_knots()>=0 else "←",int(absf(flight.wind_knots()))]]
 	for i in 7:
 		var x := 38+column_width*i
@@ -94,7 +94,7 @@ func _integrity_segment(active: bool) -> StyleBoxFlat:
 	return segment
 
 func _draw_tension() -> void:
-	var origin := Vector2(size.x-288,39)
+	var origin := Vector2(size.x-384,39)
 	var ratio := clampf(flight.tether_tension/FlightModel.TETHER_LIMIT,0,1)
 	var broken := flight.overload_warning > 0
 	if broken:
@@ -111,7 +111,7 @@ func _draw_tension() -> void:
 	_text(origin+Vector2(0,65),"100% tension releases the line",14,MUTED)
 
 func _draw_route() -> void:
-	var origin := Vector2(size.x-288,39)
+	var origin := Vector2(size.x-384,39)
 	_text(origin,"Mission route",16,MUTED)
 	_text(origin+Vector2(206,0),"%s / 03" % flight.mission.id,14,MUTED)
 	var route := PackedVector2Array()

@@ -34,6 +34,21 @@ func contact_flight() -> FlightModel:
 	return f
 
 func _initialize() -> void:
+	# Analog lift must scale smoothly while preserving existing full-key behavior.
+	var gentle := make_flight()
+	var full := make_flight()
+	var keyboard := make_flight()
+	gentle.step(0.1,0,false,false,-0.5)
+	full.step(0.1,0,false,false,-1.0)
+	keyboard.step(0.1,0,true)
+	check(full.velocity.y < gentle.velocity.y and gentle.velocity.y < 0,"Analog lift did not scale with stick distance")
+	check(full.position.is_equal_approx(keyboard.position),"Full stick lift differs from keyboard lift")
+	check(gentle.fuel > full.fuel,"Partial lift should consume less fuel")
+	var partial := make_flight()
+	var horizontal := make_flight()
+	partial.step(0.1,0.5)
+	horizontal.step(0.1,1)
+	check(partial.velocity.x>0 and partial.velocity.x<horizontal.velocity.x,"Analog steering did not scale acceleration")
 	var f := make_flight()
 	f.cable = 0
 	advance(f,0.5,1)

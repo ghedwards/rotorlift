@@ -28,3 +28,7 @@ License: [Lucide-LICENSE.txt](Lucide-LICENSE.txt). SVG geometry is unmodified; `
 - `wind.svg`: `icons/wind.svg`
 
 `helicopter.svg` and `winch.svg` remain original project-specific artwork.
+
+- `menu.svg`: `icons/menu.svg`
+
+`rescue-cross.svg` is an original red rounded square with a transparent rescue cross cut out of its centre.

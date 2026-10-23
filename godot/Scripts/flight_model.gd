@@ -400,8 +400,8 @@ func _disconnect_load(reason: String) -> void:
 	winch = Winch.RETRIEVING
 	message = reason + " Line retracting; survivor remains at the beacon."
 
-func step(dt: float, steer: float = 0, throttle: bool = false, descend: bool = false) -> void:
-	if status == Status.READY and (steer != 0 or throttle or descend):
+func step(dt: float, steer: float = 0, throttle: bool = false, descend: bool = false, vertical_input: float = NAN) -> void:
+	if status == Status.READY and (steer != 0 or throttle or descend or (not is_nan(vertical_input) and absf(vertical_input)>0.01)):
 		status = Status.PLAYING
 	if status == Status.PAUSED:
 		return
@@ -411,16 +411,17 @@ func step(dt: float, steer: float = 0, throttle: bool = false, descend: bool = f
 	var remaining := dt
 	while remaining > 0 and status == Status.PLAYING:
 		var tick := minf(remaining, 1.0 / 120)
-		_tick(tick, steer, throttle, descend)
+		_tick(tick, steer, throttle, descend, vertical_input)
 		remaining -= tick
 
-func _tick(dt: float, steer: float, throttle: bool, descend: bool) -> void:
+func _tick(dt: float, steer: float, throttle: bool, descend: bool, vertical_input: float = NAN) -> void:
+	var vertical := (-1.0 if throttle else 1.0 if descend else 0.0) if is_nan(vertical_input) else clampf(vertical_input,-1,1)
 	clock += dt
 	_update_birds(dt)
 	overload_warning = maxf(0,overload_warning-dt)
 	elapsed += dt
 	invincible = maxf(0, invincible - dt)
-	fuel = maxf(0, fuel - dt * (0.42 if throttle else 0.2))
+	fuel = maxf(0, fuel - dt * lerpf(0.2,0.42,maxf(0,-vertical)))
 	if crew_index>=0:
 		_step_crew(dt,steer)
 		if fuel<=0:
@@ -434,11 +435,12 @@ func _tick(dt: float, steer: float, throttle: bool, descend: bool) -> void:
 	velocity.x = clampf(velocity.x + acceleration * dt, -280, 280)
 	if absf(velocity.x) > 15:
 		facing = 1 if velocity.x > 0 else -1
-	if altitude_assist and not throttle and not descend:
+	if altitude_assist and is_zero_approx(vertical):
 		velocity.y += clampf((altitude_hold_y-position.y)*6-velocity.y*4,-160,160)*dt
 	else:
 		altitude_hold_y=position.y
-		velocity.y += ((-125.0 if loaded else -230.0) if throttle else 160.0 if descend else 47.0)*dt
+		var acceleration_y := lerpf(47,-125 if loaded else -230,-vertical) if vertical < 0 else lerpf(47,160,vertical)
+		velocity.y += acceleration_y*dt
 		velocity.y *= exp(-0.9*dt)
 	velocity.y = clampf(velocity.y, -85 if loaded else -155, 130)
 	var tether := tether_force()
