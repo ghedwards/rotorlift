@@ -70,3 +70,17 @@ The artifact includes `rotorlift-play.aab`, checksum, manifest, signature report
 The permanent upload key alias is `airlift-upload`. Local signing material lives in the ignored root `.signing/` directory; keep a separate secure backup of that directory, including its password file. Never commit it. GitHub Actions uses `ANDROID_UPLOAD_KEYSTORE_BASE64` and `ANDROID_UPLOAD_KEYSTORE_PASSWORD` repository secrets. Future Play bundles must keep this upload key and increase the Play preset's version code. The public PEM certificate is safe to give Google; the private JKS and password are not.
 
 The original Google Play AIRLIFT app remains `com.studioeddies.airlift`. Builds using `dev.edification.rotorlift` must be uploaded to a separate **Rotorlift** Play Console app. They cannot update the original app. The same upload key can sign the new app.
+
+## Play Console diagnostic warnings
+
+Godot's standard Android release template does not enable R8/ProGuard minification, so this build has no Java/Kotlin obfuscation mapping file. Do not upload a fabricated mapping file just to remove the optional warning.
+
+The **Build Google Play bundle** workflow also prepares `native-debug-symbols.zip`. Its tool selects the official Godot release symbols for each native library shipped in the AAB, checks their ZIP integrity and GNU build IDs against the actual AAB libraries, and includes a build-ID report. Upload the ZIP under the matching bundle's **Downloads → Assets → Native debug symbols** in Play Console. This can be done for an existing uploaded bundle without increasing its version code. It does not change gameplay or enable debug mode.
+
+To prepare symbols for a previously built bundle locally:
+
+```sh
+python3 godot/Tools/prepare_android_symbols.py godot/builds/rotorlift-play-0.0.1/rotorlift-play.aab
+```
+
+Reference: https://docs.godotengine.org/en/stable/tutorials/platform/android/resolving_crashes_on_android.html
