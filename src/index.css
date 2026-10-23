@@ -1,0 +1,2181 @@
+@import url("https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800&family=DM+Sans:wght@400;450;500;550;600;650;700;750&family=IBM+Plex+Mono:wght@400;450;500;600&display=swap");
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "DM Sans", sans-serif;
+  --font-mono: "IBM Plex Mono", monospace;
+  --color-orange: #f28a50;
+}
+
+:root {
+  font-family: "DM Sans", sans-serif;
+  color: #eceee5;
+  background: #121613;
+  font-synthesis: none;
+  font-weight: 400;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  color-scheme: dark;
+}
+* {
+  box-sizing: border-box;
+}
+body {
+  min-width: 360px;
+  margin: 0;
+}
+button,
+a {
+  -webkit-tap-highlight-color: transparent;
+}
+button {
+  cursor: pointer;
+  font: inherit;
+}
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.4;
+}
+button,
+a {
+  touch-action: manipulation;
+}
+button:focus-visible,
+a:focus-visible {
+  outline: 2px solid #f28a50;
+  outline-offset: 5px;
+}
+button {
+  border: none;
+}
+a {
+  color: inherit;
+  text-decoration: none;
+}
+svg {
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+}
+button {
+  transition:
+    color 0.2s,
+    background 0.2s,
+    border-color 0.2s,
+    transform 0.2s;
+}
+::selection {
+  color: #121613;
+  background: #f28a50;
+}
+.app-shell {
+  overflow: hidden;
+  background: radial-gradient(ellipse at 85% 0%, #1b2019 0%, transparent 45%);
+}
+.site-header {
+  height: 90px;
+  border-bottom: 1px solid #2c3129;
+}
+.header-inner {
+  max-width: 1632px;
+  margin: 0 auto;
+  padding: 0 48px;
+  height: 100%;
+  display: flex;
+  align-items: center;
+}
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.brand-symbol {
+  height: 40px;
+  width: 44px;
+  display: grid;
+  place-items: center;
+  background: #f28a50;
+  clip-path: polygon(15% 0, 100% 0, 100% 82%, 85% 100%, 0 100%, 0 18%);
+  color: #17231b;
+}
+.brand-symbol svg {
+  width: 31px;
+  height: 31px;
+  stroke-width: 1.65;
+}
+.brand-word {
+  position: relative;
+  font:
+    800 32px/0.8 "Barlow Condensed",
+    sans-serif;
+  letter-spacing: 2.3px;
+}
+.brand-period {
+  color: #f28a50;
+}
+.brand-subtitle {
+  display: block;
+  color: #a5afa0;
+  font:
+    400 7px/1 "IBM Plex Mono",
+    monospace;
+  letter-spacing: 2.1px;
+  margin-top: 9px;
+}
+.main-nav {
+  display: flex;
+  gap: 32px;
+  align-items: stretch;
+  align-self: stretch;
+  margin-left: 80px;
+}
+.nav-link {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0;
+  background: none;
+  color: #92998d;
+  font-size: 12px;
+  font-weight: 550;
+}
+.nav-link.active {
+  color: #f0f0e5;
+}
+.nav-link:hover {
+  color: #f28a50;
+}
+.nav-link.active::after {
+  content: "";
+  height: 2px;
+  width: 100%;
+  position: absolute;
+  bottom: -1px;
+  background: #f28a50;
+}
+.nav-count {
+  border: 1px solid #3b4236;
+  color: #a4ae99;
+  border-radius: 3px;
+  padding: 2px 4px;
+  font:
+    9px "IBM Plex Mono",
+    monospace;
+}
+.nav-link svg {
+  width: 12px;
+  height: 12px;
+  color: #788371;
+}
+.nav-active-dot {
+  height: 4px;
+  width: 4px;
+  border-radius: 50%;
+  background: #f28a50;
+  margin-left: 3px;
+}
+.header-right {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+.online-status {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: #959f8b;
+  font:
+    9px "IBM Plex Mono",
+    monospace;
+  letter-spacing: 0.7px;
+}
+.online-status > span {
+  background: #a0af85;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  box-shadow: 0 0 8px #a0af8520;
+}
+.header-divider {
+  height: 22px;
+  width: 1px;
+  background: #32382d;
+}
+.icon-button {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  color: #a9b19f;
+  background: none;
+  border-radius: 3px;
+}
+.icon-button svg {
+  width: 18px;
+  height: 18px;
+}
+.icon-button:hover {
+  color: #f28a50;
+  background: #ffffff06;
+}
+.sound-button.is-on {
+  color: #f28a50;
+}
+.pilot-profile {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font:
+    9px "IBM Plex Mono",
+    monospace;
+  letter-spacing: 0.7px;
+  color: #b2b9a8;
+}
+.pilot-avatar {
+  display: grid;
+  place-items: center;
+  height: 30px;
+  width: 30px;
+  border: 1px solid #424a38;
+  color: #c9d0b7;
+  background: #242b20;
+  font-size: 10px;
+}
+.main-content {
+  max-width: 1632px;
+  margin: 0 auto;
+  padding: 0 48px;
+}
+.mission-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 31px 0 30px;
+  animation: enter-up 0.65s ease both;
+}
+.eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font:
+    400 9px/1.5 "IBM Plex Mono",
+    monospace;
+  letter-spacing: 1.6px;
+  color: #929d87;
+  margin: 0;
+}
+.orange-dash {
+  width: 16px;
+  height: 2px;
+  background: #f28a50;
+  display: inline-block;
+}
+h1 {
+  font-size: clamp(30px, 3vw, 44px);
+  font-weight: 550;
+  line-height: 1.15;
+  letter-spacing: -1.8px;
+  margin: 10px 0 0;
+}
+h1 > span {
+  color: #f28a50;
+}
+.mission-switcher {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  color: #e7eade;
+  background: none;
+  padding: 9px 0 9px 23px;
+  border-left: 1px solid #343b2e;
+}
+.mission-switcher:hover {
+  color: #f28a50;
+}
+.mission-number {
+  font:
+    400 27px "Barlow Condensed",
+    sans-serif;
+  color: #f28a50;
+  letter-spacing: 1px;
+}
+.mission-number > span {
+  font:
+    10px "IBM Plex Mono",
+    monospace;
+  color: #65715f;
+}
+.mission-switcher-text {
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.mission-switcher-text > span {
+  font:
+    8px "IBM Plex Mono",
+    monospace;
+  color: #8e9981;
+  letter-spacing: 1.3px;
+}
+.mission-switcher-text > strong {
+  font-size: 17px;
+  font-weight: 500;
+  letter-spacing: -0.3px;
+}
+.mission-switcher > svg {
+  width: 17px;
+  height: 17px;
+  margin-left: 13px;
+  color: #a5ad97;
+}
+.flight-station {
+  border: 1px solid #41483b;
+  background: #1b211b;
+  animation: enter-up 0.85s 0.08s ease both;
+  border-radius: 5px;
+  overflow: hidden;
+}
+.game-viewport {
+  position: relative;
+  isolation: isolate;
+  width: 100%;
+  aspect-ratio: 2.58;
+  min-height: 390px;
+  max-height: 590px;
+  overflow: hidden;
+  background: #657b77;
+}
+.game-canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  inset: 0;
+}
+.scene-topline {
+  position: absolute;
+  top: 22px;
+  left: 26px;
+  right: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: #dbe2d1;
+  font:
+    8px "IBM Plex Mono",
+    monospace;
+  letter-spacing: 1.1px;
+  text-shadow: 0 1px 6px #13252680;
+}
+.live-status {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.live-status > span {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #f6a272;
+  box-shadow: 0 0 0 3px #f6a27216;
+}
+.live-status.is-live > span {
+  background: #cee3a8;
+  box-shadow: 0 0 0 3px #cee3a817;
+  animation: status-pulse 2s ease infinite;
+}
+.scene-region {
+  color: #e1e5d8b0;
+  font-size: 8px;
+}
+.scene-region-divider {
+  padding: 0 12px;
+  opacity: 0.5;
+}
+.hud-top {
+  position: absolute;
+  top: 51px;
+  left: 26px;
+  right: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: #faf8df;
+  text-shadow: 0 1px 10px #1526294d;
+}
+.hud-readouts {
+  display: flex;
+  align-items: center;
+  gap: 23px;
+}
+.hud-stat {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+}
+.hud-stat > svg {
+  width: 20px;
+  height: 20px;
+  color: #f0edcd;
+}
+.hud-label {
+  font:
+    8px/1.3 "IBM Plex Mono",
+    monospace;
+  letter-spacing: 1.2px;
+  color: #e3e6cfc9;
+  display: block;
+}
+.rescue-stat strong {
+  font:
+    400 27px/1.1 "Barlow Condensed",
+    sans-serif;
+  letter-spacing: 1px;
+  display: block;
+  margin-top: 5px;
+}
+.rescue-stat strong > span {
+  font-size: 17px;
+  color: #d8dfcaa6;
+}
+.hud-divider {
+  width: 1px;
+  height: 28px;
+  background: #e5e7d333;
+}
+.fuel-stat .hud-label {
+  display: flex;
+  justify-content: space-between;
+  gap: 27px;
+}
+.fuel-stat .hud-label > span {
+  color: #f5f0db;
+  letter-spacing: 0.2px;
+}
+.fuel-meter {
+  display: flex;
+  gap: 3px;
+  margin-top: 11px;
+}
+.fuel-meter i {
+  display: block;
+  width: 5px;
+  height: 12px;
+  background: #e2e4cc20;
+  transform: skew(-12deg);
+}
+.fuel-meter i.filled {
+  background: #e4e4c4;
+}
+.fuel-meter.fuel-low i.filled {
+  background: #f28a50;
+}
+.airframe-meter {
+  display: flex;
+  gap: 4px;
+  margin-top: 12px;
+}
+.airframe-meter i {
+  width: 16px;
+  height: 7px;
+  display: block;
+  background: #e2e4cc20;
+}
+.airframe-meter i.filled {
+  background: #d7dfba;
+}
+.hud-right {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+}
+.flight-time {
+  text-align: right;
+}
+.flight-time strong {
+  display: block;
+  font:
+    400 26px/1.1 "Barlow Condensed",
+    sans-serif;
+  letter-spacing: 1.4px;
+  margin-top: 4px;
+}
+.scene-button {
+  display: grid;
+  place-items: center;
+  width: 35px;
+  height: 35px;
+  color: #f0eed9;
+  border: 1px solid #e2e6d452;
+  background: #1d343322;
+  border-radius: 3px;
+}
+.scene-button svg {
+  width: 15px;
+  height: 15px;
+}
+.scene-button:hover {
+  background: #f0eed925;
+  border-color: #eeeacc;
+}
+.wind-readout {
+  position: absolute;
+  right: 28px;
+  top: 123px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: #e4e7d3c4;
+  font:
+    8px "IBM Plex Mono",
+    monospace;
+  letter-spacing: 0.5px;
+}
+.wind-readout svg {
+  width: 16px;
+  height: 16px;
+}
+.wind-readout svg:last-child {
+  width: 11px;
+  height: 11px;
+}
+.hud-bottom {
+  display: flex;
+  align-items: flex-end;
+  gap: 30px;
+  position: absolute;
+  bottom: 25px;
+  left: 26px;
+  right: 26px;
+}
+.radio-message {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  max-width: 500px;
+  text-shadow: 0 1px 5px #09232060;
+}
+.radio-symbol {
+  height: 31px;
+  width: 31px;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  border: 1px solid #bec9af57;
+  border-radius: 50%;
+  color: #d2dfc4;
+}
+.radio-symbol svg {
+  width: 15px;
+  height: 15px;
+}
+.radio-label {
+  color: #d9d8bba6;
+  font:
+    7px "IBM Plex Mono",
+    monospace;
+  letter-spacing: 1.2px;
+}
+.radio-label > span {
+  padding: 0 5px;
+  opacity: 0.5;
+}
+.radio-message p {
+  max-width: 410px;
+  color: #f0edda;
+  margin: 6px 0 0;
+  font-size: 10px;
+  line-height: 1.6;
+  animation: message-in 0.4s ease both;
+}
+.mini-instruments {
+  display: flex;
+  align-items: center;
+  margin-left: auto;
+  gap: 20px;
+}
+.mini-instruments > div {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.mini-instruments div > span {
+  font:
+    7px "IBM Plex Mono",
+    monospace;
+  color: #c9d2b299;
+  letter-spacing: 1px;
+}
+.mini-instruments strong {
+  font:
+    400 20px "Barlow Condensed",
+    sans-serif;
+  letter-spacing: 0.8px;
+  color: #e5e9cf;
+  white-space: nowrap;
+}
+.mini-instruments small {
+  font:
+    7px "IBM Plex Mono",
+    monospace;
+  color: #c4d0b5a6;
+}
+.instrument-divider {
+  width: 1px;
+  height: 25px;
+  background: #afbc9c26;
+}
+.route-map {
+  width: 153px;
+  margin-left: 11px;
+}
+.route-label {
+  display: flex;
+  justify-content: space-between;
+  font:
+    6px "IBM Plex Mono",
+    monospace;
+  letter-spacing: 1px;
+  color: #cbd6bd99;
+}
+.route-label > span:last-child {
+  color: #e3d6ac9c;
+}
+.route-map > svg {
+  width: 100%;
+  height: 35px;
+  margin-top: 5px;
+}
+.takeoff-tip {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  position: absolute;
+  left: 29%;
+  top: 44%;
+  color: #f1efdc;
+  font:
+    7px "IBM Plex Mono",
+    monospace;
+  letter-spacing: 1px;
+  text-shadow: 0 1px 8px #183133;
+  opacity: 0;
+  animation: hint-in 0.6s 1.2s ease forwards;
+}
+.takeoff-tip > svg {
+  width: 12px;
+  height: 12px;
+  animation: lift-arrow 2.5s ease infinite;
+}
+.tip-line {
+  width: 27px;
+  height: 1px;
+  background: #ece8c359;
+}
+.viewport-corner {
+  width: 10px;
+  height: 10px;
+  border-color: #c9d4bb99;
+  position: absolute;
+  pointer-events: none;
+  z-index: 4;
+}
+.corner-tl {
+  top: 7px;
+  left: 7px;
+  border-top: 1px solid;
+  border-left: 1px solid;
+}
+.corner-tr {
+  top: 7px;
+  right: 7px;
+  border-top: 1px solid;
+  border-right: 1px solid;
+}
+.corner-bl {
+  bottom: 7px;
+  left: 7px;
+  border-bottom: 1px solid;
+  border-left: 1px solid;
+}
+.corner-br {
+  bottom: 7px;
+  right: 7px;
+  border-bottom: 1px solid;
+  border-right: 1px solid;
+}
+.flight-controls {
+  min-height: 112px;
+  padding: 22px 26px;
+  display: flex;
+  align-items: center;
+  gap: 27px;
+  border-top: 1px solid #484c3a;
+  background: linear-gradient(110deg, #242b21 0%, #1c231c 60%);
+}
+.flight-deck-label {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 205px;
+  padding-right: 20px;
+  margin-right: auto;
+}
+.flight-deck-label > svg {
+  color: #909b80;
+  width: 24px;
+  height: 24px;
+}
+.flight-deck-label > div {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+.flight-deck-label span {
+  font:
+    9px "IBM Plex Mono",
+    monospace;
+  letter-spacing: 1.6px;
+  color: #d6d9c2;
+}
+.flight-deck-label small {
+  font-size: 10px;
+  color: #8f9b83;
+}
+.control-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.control-caption {
+  font:
+    7px "IBM Plex Mono",
+    monospace;
+  letter-spacing: 1px;
+  color: #939e85;
+}
+.steering-buttons {
+  display: flex;
+  gap: 5px;
+}
+.key-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  background: #323a2b;
+  border: 1px solid #586047;
+  border-bottom: 3px solid #454f39;
+  color: #dbe1c8;
+  border-radius: 4px;
+  height: 39px;
+  width: 66px;
+  touch-action: none;
+  user-select: none;
+}
+.key-button > svg {
+  width: 17px;
+  height: 17px;
+}
+.key-button > span {
+  color: #a8b294;
+  font:
+    9px "IBM Plex Mono",
+    monospace;
+}
+.key-button:hover {
+  border-color: #87946a;
+  background: #3d4730;
+}
+.key-button.pressed {
+  color: #f28a50;
+  background: #414a2e;
+  border-color: #a6ab75;
+  transform: translateY(1px);
+  border-bottom-width: 1px;
+}
+.throttle-button,
+.winch-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 11px;
+  height: 39px;
+  padding: 0 15px;
+  border-radius: 4px;
+  font:
+    500 9px "IBM Plex Mono",
+    monospace;
+  letter-spacing: 0.7px;
+  user-select: none;
+}
+.throttle-button {
+  background: #f28a50;
+  color: #272e20;
+  border: 1px solid #f5a06d;
+  border-bottom: 3px solid #bf6536;
+  touch-action: none;
+}
+.throttle-button:hover {
+  background: #ffa065;
+}
+.throttle-button.pressed {
+  background: #ffc084;
+  border-color: #ffd0a2;
+  border-bottom-width: 1px;
+  transform: translateY(1px);
+}
+.throttle-button > svg,
+.winch-button > svg {
+  width: 17px;
+  height: 17px;
+}
+kbd {
+  font-family: "IBM Plex Mono", monospace;
+}
+.throttle-button > kbd,
+.winch-button > kbd {
+  display: grid;
+  place-items: center;
+  padding: 3px 5px;
+  min-width: 18px;
+  height: 19px;
+  border: 1px solid #232b2136;
+  font-size: 8px;
+  line-height: 1;
+  border-radius: 2px;
+  margin-left: 4px;
+}
+.winch-button {
+  min-width: 204px;
+  background: transparent;
+  color: #e3e7cf;
+  border: 1px solid #687050;
+  border-bottom: 3px solid #49563b;
+}
+.winch-button > svg {
+  color: #e3a368;
+}
+.winch-button > kbd {
+  border-color: #7e88633d;
+  color: #b4be9e;
+  font-size: 6px;
+  letter-spacing: 0.1px;
+  padding: 3px 4px;
+}
+.winch-button:hover,
+.winch-button.winch-active {
+  border-color: #d59660;
+  background: #f28a500b;
+  color: #efba80;
+}
+.deck-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 17px 0 0 auto;
+  padding-left: 20px;
+  border-left: 1px solid #4e573934;
+}
+.deck-actions .icon-button {
+  width: 29px;
+  height: 30px;
+  color: #a5b18f;
+}
+.deck-actions .icon-button > svg {
+  width: 16px;
+  height: 16px;
+}
+.station-statusbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 36px;
+  padding: 0 26px;
+  border-top: 1px solid #3c453030;
+  font:
+    6px "IBM Plex Mono",
+    monospace;
+  letter-spacing: 0.8px;
+  color: #8c997c;
+  background: #1a211a;
+}
+.station-statusbar > span:first-child {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: #a1b087;
+  white-space: nowrap;
+}
+.status-led {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: #acbb8d;
+}
+.statusbar-tip {
+  color: #87977b;
+  letter-spacing: 0.1px;
+  font-size: 7px;
+  padding: 0 20px;
+  text-align: center;
+}
+.station-statusbar > button {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 0;
+  font: inherit;
+  background: none;
+  color: #a3af91;
+  letter-spacing: 0.8px;
+  white-space: nowrap;
+}
+.station-statusbar > button:hover {
+  color: #f28a50;
+}
+.station-statusbar > button svg {
+  width: 10px;
+  height: 10px;
+}
+.mission-brief {
+  padding: 33px 0 36px;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  animation: enter-up 0.85s 0.2s ease both;
+}
+.objective-icon {
+  display: grid;
+  place-items: center;
+  width: 39px;
+  height: 39px;
+  color: #79896c;
+  border: 1px solid #3c4833;
+  border-radius: 50%;
+}
+.objective-icon > svg {
+  width: 19px;
+  height: 19px;
+}
+.objective-copy .eyebrow {
+  font-size: 7px;
+  letter-spacing: 1.2px;
+  color: #8a977d;
+}
+.objective-copy h2 {
+  font-size: 17px;
+  font-weight: 500;
+  letter-spacing: -0.4px;
+  margin: 7px 0 6px;
+}
+.objective-copy p {
+  font-size: 10px;
+  color: #929d87;
+  margin: 0;
+}
+.briefing-link {
+  margin-left: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 7px;
+  padding: 0;
+  color: #8c9980;
+  background: none;
+  font-size: 9px;
+}
+.briefing-link > span {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  color: #d6dbc6;
+  font-size: 10px;
+}
+.briefing-link > span svg {
+  width: 12px;
+  height: 12px;
+  color: #d39c66;
+}
+.briefing-link:hover > span {
+  color: #f28a50;
+}
+.site-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 1632px;
+  margin: 0 auto;
+  min-height: 62px;
+  padding: 0 48px;
+  border-top: 1px solid #2c3427;
+  font:
+    7px "IBM Plex Mono",
+    monospace;
+  letter-spacing: 1px;
+  color: #7d8b71;
+}
+.site-footer > span {
+  display: flex;
+  align-items: center;
+}
+.footer-slash {
+  color: #bd8051;
+  padding: 0 13px;
+}
+.footer-cross {
+  display: grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  border: 1px solid #566347;
+  margin-left: 18px;
+  color: #a1ac90;
+  font-size: 13px;
+}
+.game-overlay {
+  position: absolute;
+  z-index: 3;
+  inset: 0;
+  background: #111e1ace;
+  backdrop-filter: blur(7px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  text-align: center;
+  padding: 28px;
+  animation: message-in 0.3s ease both;
+}
+.overlay-kicker {
+  font:
+    8px "IBM Plex Mono",
+    monospace;
+  color: #f1a26d;
+  letter-spacing: 2px;
+}
+.game-overlay h2 {
+  font-weight: 500;
+  font-size: clamp(26px, 3vw, 43px);
+  letter-spacing: -1.5px;
+  line-height: 1.15;
+  margin: 13px 0 10px;
+}
+.game-overlay p {
+  margin: 0 0 25px;
+  color: #b2bea8;
+  font-size: 12px;
+  max-width: 420px;
+  line-height: 1.7;
+}
+.primary-button {
+  min-height: 43px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 20px;
+  padding: 0 20px;
+  border: 1px solid #f4a06b;
+  border-radius: 3px;
+  background: #f28a50;
+  color: #212c20;
+  font-size: 11px;
+  font-weight: 650;
+}
+.primary-button > svg {
+  width: 16px;
+  height: 16px;
+}
+.primary-button:hover {
+  background: #ffac74;
+  transform: translateY(-1px);
+}
+.button-key {
+  display: grid;
+  place-items: center;
+  border: 1px solid #3b3b2340;
+  height: 19px;
+  width: 19px;
+  font:
+    8px "IBM Plex Mono",
+    monospace;
+  border-radius: 2px;
+}
+.text-button {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  color: #bdc9b0;
+  font-size: 9px;
+  background: none;
+  margin-top: 18px;
+}
+.text-button > svg {
+  width: 12px;
+  height: 12px;
+}
+.text-button:hover {
+  color: #f28a50;
+}
+.result-symbol {
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  border: 1px solid #aabc87;
+  color: #c4d7a2;
+  border-radius: 50%;
+  margin-bottom: 18px;
+}
+.failed-symbol {
+  border-color: #e39c67;
+  color: #e39c67;
+}
+.result-summary {
+  display: flex;
+  gap: 35px;
+  margin: -8px 0 25px;
+  font:
+    7px "IBM Plex Mono",
+    monospace;
+  color: #98aa89;
+  letter-spacing: 0.5px;
+}
+.result-summary > span {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.result-summary strong {
+  font:
+    18px "Barlow Condensed",
+    sans-serif;
+  color: #e6ecd6;
+}
+.dialog {
+  color: #eceee0;
+  background: #1c241c;
+  border: 1px solid #526044;
+  border-radius: 6px;
+  padding: 36px;
+  width: min(610px, calc(100% - 32px));
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 25px 100px #0005;
+  margin: auto;
+  animation: dialog-in 0.25s ease both;
+}
+.dialog-wide {
+  width: min(760px, calc(100% - 32px));
+}
+.dialog::backdrop {
+  background: #09120dd1;
+  backdrop-filter: blur(7px);
+}
+.dialog-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+}
+.dialog > .eyebrow {
+  font-size: 8px;
+  margin: 0 25px 17px 0;
+}
+.dialog-title {
+  font-size: 29px;
+  font-weight: 500;
+  line-height: 1.2;
+  letter-spacing: -0.9px;
+  margin: 0 20px 12px 0;
+}
+.dialog-description {
+  color: #a4b297;
+  font-size: 11px;
+  line-height: 1.7;
+  margin: 0 0 25px;
+}
+.mission-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.mission-option {
+  display: flex;
+  width: 100%;
+  background: #232e21;
+  border: 1px solid #46553b;
+  border-radius: 4px;
+  padding: 10px;
+  gap: 18px;
+  color: #e1e8d4;
+  text-align: left;
+}
+.mission-option:hover {
+  border-color: #c28b57;
+  background: #2c3826;
+  transform: translateX(2px);
+}
+.mission-option.selected {
+  border-color: #b18657;
+}
+.mission-thumbnail {
+  position: relative;
+  width: 122px;
+  min-height: 110px;
+  flex-shrink: 0;
+  background-position: center;
+  background-size: cover;
+  border-radius: 2px;
+  overflow: hidden;
+}
+.mission-thumbnail::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(transparent, #132b24a8);
+}
+.mission-thumbnail > span {
+  position: absolute;
+  left: 10px;
+  bottom: 8px;
+  z-index: 1;
+  font:
+    500 33px "Barlow Condensed",
+    sans-serif;
+  color: #f3e4c6;
+}
+.mission-option-copy {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  justify-content: center;
+  padding: 4px 0;
+  min-width: 0;
+}
+.mission-option-meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font:
+    6px "IBM Plex Mono",
+    monospace;
+  letter-spacing: 0.8px;
+  color: #9daa86;
+}
+.mission-option-meta > span {
+  color: #d99f6d;
+}
+.mission-option-copy > strong {
+  font-size: 20px;
+  font-weight: 500;
+  margin-top: 7px;
+  letter-spacing: -0.5px;
+}
+.mission-option-description {
+  font-size: 9px;
+  line-height: 1.7;
+  margin-top: 4px;
+  color: #a7b599;
+}
+.mission-conditions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 8px;
+  color: #d0d8bc;
+  margin-top: 8px;
+}
+.mission-conditions > svg {
+  width: 13px;
+  height: 13px;
+  color: #95a77e;
+}
+.mission-option-arrow {
+  display: grid;
+  place-items: center;
+  padding: 0 8px;
+  color: #e49d63;
+}
+.mission-option-arrow > svg {
+  width: 18px;
+  height: 18px;
+}
+.dialog-footnote {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin: 20px 0 0;
+  font:
+    7px/1.6 "IBM Plex Mono",
+    monospace;
+  color: #8b9b7b;
+}
+.dialog-footnote > svg {
+  width: 13px;
+  height: 13px;
+}
+.manual-controls {
+  display: flex;
+  flex-direction: column;
+}
+.manual-controls > div {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  padding: 18px 0;
+  border-top: 1px solid #3f4e34;
+}
+.manual-keys {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  width: 78px;
+  flex-shrink: 0;
+}
+.manual-keys > kbd,
+.manual-footer > span > kbd {
+  display: grid;
+  place-items: center;
+  min-width: 31px;
+  height: 32px;
+  background: #313f28;
+  color: #d0dbba;
+  border: 1px solid #61734c;
+  border-bottom: 3px solid #4b6038;
+  border-radius: 3px;
+  font-size: 11px;
+}
+.manual-keys > svg {
+  width: 22px;
+  height: 22px;
+  margin-left: 5px;
+  color: #b4c29b;
+}
+.manual-keys > .wide-key {
+  width: 70px;
+  font-size: 9px;
+}
+.manual-controls strong {
+  font-size: 12px;
+  font-weight: 500;
+}
+.manual-controls p {
+  color: #a5b595;
+  font-size: 10px;
+  line-height: 1.75;
+  margin: 6px 0 0;
+}
+.manual-tip {
+  display: flex;
+  align-items: flex-start;
+  gap: 13px;
+  margin-top: 7px;
+  padding: 17px 0;
+  border-top: 1px solid #3f4e34;
+  border-bottom: 1px solid #3f4e34;
+}
+.manual-tip > svg {
+  width: 20px;
+  height: 20px;
+  color: #d6a16a;
+  margin-top: 2px;
+}
+.manual-tip p {
+  font-size: 10px;
+  line-height: 1.8;
+  color: #a8b99a;
+  margin: 0;
+}
+.manual-tip strong {
+  display: block;
+  font-size: 11px;
+  color: #e2d9b5;
+  font-weight: 500;
+  margin-bottom: 4px;
+}
+.manual-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 25px;
+}
+.manual-footer > span {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font:
+    7px "IBM Plex Mono",
+    monospace;
+  color: #9bad88;
+  letter-spacing: 0.6px;
+}
+.manual-footer > span > kbd {
+  height: 23px;
+  min-width: 23px;
+  font-size: 9px;
+  border-bottom-width: 2px;
+}
+.is-fullscreen {
+  border-radius: 0;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+.is-fullscreen .game-viewport {
+  flex: 1;
+  max-height: none;
+  aspect-ratio: auto;
+}
+.is-fullscreen .flight-controls {
+  flex-shrink: 0;
+  justify-content: center;
+}
+.is-fullscreen .station-statusbar {
+  flex-shrink: 0;
+}
+@keyframes enter-up {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes hint-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 0.75;
+    transform: translateY(0);
+  }
+}
+@keyframes lift-arrow {
+  0%,
+  100% {
+    transform: translateY(1px);
+    opacity: 0.7;
+  }
+  50% {
+    transform: translateY(-3px);
+    opacity: 1;
+  }
+}
+@keyframes status-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 3px #cee3a817;
+  }
+  50% {
+    box-shadow: 0 0 0 5px #cee3a808;
+  }
+}
+@keyframes message-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes dialog-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+@media (min-width: 1650px) {
+  .game-viewport {
+    aspect-ratio: 2.6;
+  }
+  .mission-heading {
+    padding-top: 38px;
+    padding-bottom: 36px;
+  }
+}
+@media (max-width: 1250px) {
+  .header-inner,
+  .main-content {
+    padding-left: 32px;
+    padding-right: 32px;
+  }
+  .main-nav {
+    margin-left: 55px;
+    gap: 26px;
+  }
+  .header-right {
+    gap: 15px;
+  }
+  .online-status {
+    display: none;
+  }
+  .flight-controls {
+    gap: 22px;
+    padding-left: 22px;
+    padding-right: 22px;
+  }
+  .flight-deck-label {
+    min-width: auto;
+    padding-right: 0;
+  }
+  .flight-deck-label small {
+    max-width: 100px;
+    line-height: 1.4;
+  }
+  .flight-deck-label > svg {
+    display: none;
+  }
+  .deck-actions {
+    gap: 4px;
+    padding-left: 14px;
+  }
+  .site-footer {
+    padding: 0 32px;
+  }
+}
+@media (max-width: 1000px) {
+  .site-header {
+    height: 78px;
+  }
+  .header-inner,
+  .main-content {
+    padding-left: 24px;
+    padding-right: 24px;
+  }
+  .main-nav {
+    margin-left: 45px;
+    gap: 22px;
+  }
+  .pilot-profile > span:last-child {
+    display: none;
+  }
+  .header-divider {
+    display: none;
+  }
+  .header-right {
+    gap: 10px;
+  }
+  .mission-heading {
+    padding-top: 27px;
+    padding-bottom: 26px;
+  }
+  .mission-heading h1 {
+    font-size: 35px;
+  }
+  .mission-heading .eyebrow {
+    font-size: 8px;
+    letter-spacing: 1px;
+  }
+  .mission-switcher {
+    gap: 14px;
+  }
+  .mission-switcher > svg {
+    margin-left: 0;
+  }
+  .flight-controls {
+    gap: 20px;
+    min-height: 110px;
+  }
+  .flight-deck-label {
+    display: none;
+  }
+  .steering-controls {
+    margin-right: auto;
+  }
+  .deck-actions {
+    margin-left: auto;
+  }
+  .radio-message {
+    max-width: 370px;
+  }
+  .route-map {
+    width: 125px;
+    margin-left: 0;
+  }
+  .hud-bottom {
+    gap: 20px;
+  }
+  .mini-instruments {
+    gap: 13px;
+  }
+  .statusbar-tip {
+    max-width: 50%;
+    font-size: 6px;
+    line-height: 1.5;
+  }
+  .site-footer {
+    padding: 0 24px;
+  }
+}
+@media (max-width: 760px) {
+  .header-inner,
+  .main-content {
+    padding-left: 18px;
+    padding-right: 18px;
+  }
+  .site-header {
+    height: 73px;
+  }
+  .brand-symbol {
+    width: 35px;
+    height: 35px;
+  }
+  .brand-symbol > svg {
+    width: 26px;
+    height: 26px;
+  }
+  .brand {
+    gap: 9px;
+  }
+  .brand-word {
+    font-size: 27px;
+    letter-spacing: 1.8px;
+  }
+  .brand-subtitle {
+    font-size: 6px;
+    letter-spacing: 1.5px;
+    margin-top: 8px;
+  }
+  .main-nav {
+    margin-left: auto;
+    gap: 23px;
+  }
+  .nav-link {
+    font-size: 11px;
+  }
+  .nav-link:last-child {
+    display: none;
+  }
+  .nav-count {
+    font-size: 7px;
+  }
+  .header-right {
+    margin-left: 20px;
+  }
+  .pilot-profile {
+    display: none;
+  }
+  .mission-heading {
+    padding: 24px 0;
+  }
+  .mission-heading .eyebrow {
+    font-size: 6px;
+    letter-spacing: 0.8px;
+    gap: 6px;
+  }
+  .mission-heading .orange-dash {
+    width: 11px;
+  }
+  .mission-heading h1 {
+    font-size: 31px;
+    letter-spacing: -1.3px;
+    margin-top: 9px;
+  }
+  .mission-switcher {
+    padding-left: 16px;
+    gap: 17px;
+  }
+  .mission-number {
+    display: none;
+  }
+  .mission-switcher-text > span {
+    font-size: 6px;
+    letter-spacing: 0.9px;
+  }
+  .mission-switcher-text > strong {
+    font-size: 14px;
+  }
+  .mission-switcher > svg {
+    width: 14px;
+    height: 14px;
+  }
+  .game-viewport {
+    min-height: 440px;
+    aspect-ratio: 1.6;
+  }
+  .scene-topline {
+    top: 19px;
+    left: 20px;
+    right: 20px;
+    font-size: 7px;
+  }
+  .scene-region {
+    font-size: 6px;
+  }
+  .scene-region-divider {
+    padding: 0 6px;
+  }
+  .hud-top {
+    top: 46px;
+    left: 20px;
+    right: 20px;
+  }
+  .hud-readouts {
+    gap: 16px;
+  }
+  .hud-stat {
+    gap: 8px;
+  }
+  .hud-stat > svg {
+    width: 17px;
+    height: 17px;
+  }
+  .airframe-stat,
+  .airframe-divider {
+    display: none;
+  }
+  .hud-label {
+    font-size: 6px;
+    letter-spacing: 0.8px;
+  }
+  .rescue-stat strong {
+    font-size: 24px;
+  }
+  .rescue-stat strong > span {
+    font-size: 15px;
+  }
+  .fuel-stat .hud-label {
+    gap: 13px;
+  }
+  .fuel-meter {
+    gap: 2px;
+    margin-top: 10px;
+  }
+  .fuel-meter i {
+    width: 4px;
+    height: 10px;
+  }
+  .flight-time strong {
+    font-size: 23px;
+  }
+  .hud-right {
+    gap: 14px;
+  }
+  .wind-readout {
+    top: 111px;
+    right: 21px;
+    font-size: 7px;
+  }
+  .hud-bottom {
+    bottom: 22px;
+    left: 20px;
+    right: 20px;
+  }
+  .radio-message {
+    max-width: 350px;
+    gap: 10px;
+  }
+  .radio-message p {
+    font-size: 9px;
+  }
+  .radio-label {
+    font-size: 6px;
+  }
+  .radio-symbol {
+    width: 27px;
+    height: 27px;
+  }
+  .mini-instruments {
+    display: none;
+  }
+  .route-map {
+    min-width: 100px;
+  }
+  .flight-controls {
+    gap: 15px;
+    padding: 20px;
+    min-height: 105px;
+  }
+  .key-button {
+    width: 48px;
+    gap: 5px;
+  }
+  .key-button > span {
+    font-size: 8px;
+  }
+  .control-caption {
+    font-size: 6px;
+    letter-spacing: 0.7px;
+  }
+  .throttle-button,
+  .winch-button {
+    font-size: 8px;
+    gap: 7px;
+    padding: 0 10px;
+  }
+  .throttle-button > kbd {
+    margin-left: 1px;
+    font-size: 7px;
+  }
+  .winch-button {
+    min-width: 169px;
+  }
+  .winch-button > kbd {
+    margin-left: 1px;
+    font-size: 5px;
+  }
+  .deck-actions {
+    display: none;
+  }
+  .station-statusbar {
+    padding: 0 20px;
+    min-height: 33px;
+    font-size: 5px;
+    letter-spacing: 0.5px;
+  }
+  .statusbar-tip {
+    display: none;
+  }
+  .takeoff-tip {
+    top: 48%;
+    left: 36%;
+    font-size: 5px;
+    gap: 4px;
+    letter-spacing: 0.5px;
+  }
+  .tip-line {
+    width: 12px;
+  }
+  .takeoff-tip > svg {
+    width: 9px;
+    height: 9px;
+  }
+  .mission-brief {
+    padding: 28px 0;
+    gap: 13px;
+  }
+  .objective-icon {
+    width: 32px;
+    height: 32px;
+    flex-shrink: 0;
+  }
+  .objective-icon > svg {
+    width: 16px;
+    height: 16px;
+  }
+  .objective-copy h2 {
+    font-size: 15px;
+  }
+  .objective-copy p {
+    font-size: 9px;
+    line-height: 1.7;
+  }
+  .briefing-link {
+    display: none;
+  }
+  .site-footer {
+    padding: 0 18px;
+    min-height: 54px;
+    font-size: 5px;
+    letter-spacing: 0.5px;
+  }
+  .footer-cross {
+    display: none;
+  }
+}
+@media (max-width: 520px) {
+  .header-inner,
+  .main-content {
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+  .main-nav {
+    gap: 17px;
+  }
+  .header-right {
+    margin-left: 9px;
+  }
+  .sound-button {
+    width: 28px;
+  }
+  .sound-button > svg {
+    width: 16px;
+    height: 16px;
+  }
+  .brand-symbol {
+    width: 30px;
+    height: 32px;
+  }
+  .brand-symbol > svg {
+    width: 24px;
+    height: 24px;
+  }
+  .brand-word {
+    font-size: 25px;
+  }
+  .brand-subtitle {
+    font-size: 5px;
+    letter-spacing: 1.3px;
+  }
+  .nav-link {
+    font-size: 10px;
+    gap: 5px;
+  }
+  .nav-count {
+    display: none;
+  }
+  .mission-heading {
+    padding: 25px 0 23px;
+  }
+  .mission-heading h1 {
+    font-size: 27px;
+  }
+  .mission-heading .eyebrow {
+    font-size: 5px;
+    letter-spacing: 0.55px;
+  }
+  .mission-switcher {
+    gap: 9px;
+    padding-left: 12px;
+  }
+  .mission-switcher-text > span {
+    font-size: 5px;
+    letter-spacing: 0.5px;
+  }
+  .mission-switcher-text > strong {
+    font-size: 13px;
+  }
+  .mission-switcher > svg {
+    width: 12px;
+    height: 12px;
+  }
+  .game-viewport {
+    min-height: 450px;
+  }
+  .scene-topline {
+    left: 16px;
+    right: 16px;
+    font-size: 6px;
+  }
+  .scene-region {
+    font-size: 5px;
+    letter-spacing: 0.2px;
+  }
+  .hud-top {
+    left: 16px;
+    right: 16px;
+  }
+  .hud-readouts {
+    gap: 12px;
+  }
+  .hud-stat {
+    gap: 6px;
+  }
+  .hud-stat > svg {
+    width: 15px;
+    height: 15px;
+  }
+  .hud-right {
+    gap: 10px;
+  }
+  .scene-button {
+    width: 29px;
+    height: 29px;
+  }
+  .fuel-stat > svg {
+    display: none;
+  }
+  .hud-divider {
+    height: 25px;
+  }
+  .hud-bottom {
+    left: 16px;
+    right: 16px;
+    bottom: 23px;
+  }
+  .radio-message {
+    max-width: 290px;
+  }
+  .radio-message p {
+    font-size: 9px;
+  }
+  .route-map {
+    display: none;
+  }
+  .takeoff-tip {
+    left: 44%;
+    top: 48%;
+    max-width: 140px;
+    line-height: 1.8;
+  }
+  .tip-line {
+    display: none;
+  }
+  .flight-controls {
+    display: grid;
+    grid-template-columns: 1fr 1.1fr;
+    gap: 17px 20px;
+    padding: 18px 20px 21px;
+  }
+  .steering-controls {
+    margin-right: 0;
+  }
+  .steering-buttons {
+    width: 100%;
+    gap: 7px;
+  }
+  .key-button {
+    flex: 1;
+    width: auto;
+  }
+  .key-button,
+  .throttle-button {
+    height: 44px;
+  }
+  .control-group {
+    gap: 7px;
+  }
+  .control-caption {
+    font-size: 6px;
+  }
+  .throttle-button {
+    width: 100%;
+  }
+  .winch-controls {
+    grid-column: 1 / 3;
+  }
+  .winch-controls > .control-caption {
+    display: none;
+  }
+  .winch-button {
+    width: 100%;
+    height: 44px;
+    justify-content: center;
+    gap: 16px;
+  }
+  .winch-button > kbd {
+    margin-left: 14px;
+    font-size: 6px;
+  }
+  .station-statusbar {
+    padding: 0 16px;
+    min-height: 33px;
+  }
+  .mission-brief {
+    gap: 11px;
+    padding: 26px 0;
+  }
+  .objective-copy p {
+    max-width: 280px;
+    font-size: 8px;
+  }
+  .site-footer {
+    padding: 0 14px;
+  }
+  .site-footer > span:last-child {
+    display: none;
+  }
+  .dialog {
+    padding: 27px 22px;
+  }
+  .dialog-title {
+    font-size: 25px;
+    margin-right: 5px;
+  }
+  .dialog > .eyebrow {
+    font-size: 6px;
+    margin-bottom: 15px;
+  }
+  .dialog-description {
+    font-size: 10px;
+  }
+  .dialog-close {
+    right: 8px;
+    top: 8px;
+    width: 30px;
+    height: 30px;
+  }
+  .mission-option {
+    gap: 12px;
+    padding: 8px;
+  }
+  .mission-thumbnail {
+    width: 70px;
+    min-height: 124px;
+  }
+  .mission-option-arrow {
+    display: none;
+  }
+  .mission-option-meta {
+    flex-direction: column;
+    gap: 5px;
+    font-size: 5px;
+  }
+  .mission-option-copy > strong {
+    font-size: 18px;
+  }
+  .mission-option-description {
+    font-size: 8px;
+  }
+  .mission-conditions {
+    font-size: 7px;
+  }
+  .dialog-footnote {
+    font-size: 6px;
+    align-items: flex-start;
+  }
+  .manual-controls > div {
+    gap: 16px;
+  }
+  .manual-keys {
+    width: 65px;
+  }
+  .manual-keys > kbd {
+    min-width: 27px;
+    height: 30px;
+    font-size: 10px;
+  }
+  .manual-keys > .wide-key {
+    width: 62px;
+    font-size: 8px;
+  }
+  .manual-controls strong {
+    font-size: 11px;
+  }
+  .manual-controls p,
+  .manual-tip p {
+    font-size: 9px;
+  }
+  .manual-footer {
+    gap: 10px;
+  }
+  .manual-footer > span {
+    font-size: 5px;
+    gap: 6px;
+    letter-spacing: 0.2px;
+  }
+  .manual-footer .primary-button {
+    font-size: 10px;
+    padding: 0 13px;
+    gap: 12px;
+  }
+  .game-overlay {
+    padding: 24px;
+  }
+  .game-overlay h2 {
+    font-size: 29px;
+  }
+  .game-overlay p {
+    font-size: 11px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-delay: 0s !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
