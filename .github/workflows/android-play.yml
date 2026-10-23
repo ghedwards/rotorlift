@@ -86,33 +86,33 @@ jobs:
           printf '%s' "$UPLOAD_KEYSTORE" | base64 --decode > "$GODOT_ANDROID_KEYSTORE_RELEASE_PATH"
           trap 'rm -f "$GODOT_ANDROID_KEYSTORE_RELEASE_PATH"' EXIT
           mkdir -p godot/builds/play
-          godot --headless --path godot --install-android-build-template --export-release 'Android Play' builds/play/airlift-play.aab
-          jarsigner -verify godot/builds/play/airlift-play.aab | tee godot/builds/play/signature-verification.txt
+          godot --headless --path godot --install-android-build-template --export-release 'Android Play' builds/play/rotorlift-play.aab
+          jarsigner -verify godot/builds/play/rotorlift-play.aab | tee godot/builds/play/signature-verification.txt
           grep -q 'jar verified' godot/builds/play/signature-verification.txt
-          keytool -printcert -jarfile godot/builds/play/airlift-play.aab > godot/builds/play/signing-certificate.txt
+          keytool -printcert -jarfile godot/builds/play/rotorlift-play.aab > godot/builds/play/signing-certificate.txt
           keytool -exportcert -rfc -keystore "$GODOT_ANDROID_KEYSTORE_RELEASE_PATH" -alias airlift-upload -storepass:env GODOT_ANDROID_KEYSTORE_RELEASE_PASSWORD -file godot/builds/play/upload-certificate.pem
       - name: Validate package and release manifest
         shell: bash
         run: |
           set -euo pipefail
           curl -fLsS --retry 3 'https://github.com/google/bundletool/releases/download/1.18.2/bundletool-all-1.18.2.jar' -o "$RUNNER_TEMP/bundletool.jar"
-          java -jar "$RUNNER_TEMP/bundletool.jar" validate --bundle=godot/builds/play/airlift-play.aab
-          java -jar "$RUNNER_TEMP/bundletool.jar" dump manifest --bundle=godot/builds/play/airlift-play.aab > godot/builds/play/AndroidManifest.xml
+          java -jar "$RUNNER_TEMP/bundletool.jar" validate --bundle=godot/builds/play/rotorlift-play.aab
+          java -jar "$RUNNER_TEMP/bundletool.jar" dump manifest --bundle=godot/builds/play/rotorlift-play.aab > godot/builds/play/AndroidManifest.xml
           python3 - <<'PYCODE'
           import pathlib, xml.etree.ElementTree as ET
           root=ET.parse('godot/builds/play/AndroidManifest.xml').getroot()
           android='{http://schemas.android.com/apk/res/android}'
-          assert root.attrib['package']=='com.studioeddies.airlift'
+          assert root.attrib['package']=='dev.edification.rotorlift'
           assert root.attrib[android+'versionName']=='0.0.1'
           assert root.find('application').get(android+'debuggable','false')=='false'
           assert any(a.get(android+'screenOrientation') in ['userLandscape','11'] for a in root.findall('./application/activity'))
-          print('Verified release bundle: com.studioeddies.airlift, version 0.0.1, landscape, non-debuggable')
+          print('Verified release bundle: dev.edification.rotorlift, version 0.0.1, landscape, non-debuggable')
           PYCODE
           cd godot/builds/play
-          sha256sum airlift-play.aab > SHA256SUMS.txt
+          sha256sum rotorlift-play.aab > SHA256SUMS.txt
       - uses: actions/upload-artifact@v4
         with:
-          name: airlift-google-play
+          name: rotorlift-google-play
           path: godot/builds/play/
           retention-days: 30
           if-no-files-found: error
