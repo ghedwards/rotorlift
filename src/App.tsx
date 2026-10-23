@@ -280,7 +280,7 @@ export default function App() {
   async function toggleFullscreen() {
     try {
       if (document.fullscreenElement) await document.exitFullscreen();
-      else await stationRef.current?.requestFullscreen();
+      else await document.documentElement.requestFullscreen();
     } catch {
       /* The game remains playable when fullscreen is unavailable. */
     }
@@ -406,7 +406,7 @@ export default function App() {
         </section>
 
         <section
-          className={`flight-station ${fullscreen ? "is-fullscreen" : ""}`}
+          className="flight-station"
           id="flight-station"
           ref={stationRef}
           aria-label="Helicopter rescue game"

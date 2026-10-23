@@ -1418,24 +1418,6 @@ kbd {
   font-size: 9px;
   border-bottom-width: 2px;
 }
-.is-fullscreen {
-  border-radius: 0;
-  height: 100vh;
-  display: flex;
-  flex-direction: column;
-}
-.is-fullscreen .game-viewport {
-  flex: 1;
-  max-height: none;
-  aspect-ratio: auto;
-}
-.is-fullscreen .flight-controls {
-  flex-shrink: 0;
-  justify-content: center;
-}
-.is-fullscreen .station-statusbar {
-  flex-shrink: 0;
-}
 @keyframes enter-up {
   from {
     opacity: 0;
@@ -2177,5 +2159,71 @@ kbd {
     animation-delay: 0s !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
+  }
+}
+
+/* Keep the flight station fitted to the available screen on every device. */
+.app-shell {
+  height: 100vh;
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+.site-header {
+  height: 64px;
+  flex-shrink: 0;
+}
+.header-inner {
+  max-width: none;
+}
+.main-content {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 0;
+}
+.mission-heading,
+.mission-brief,
+.site-footer {
+  display: none;
+}
+.flight-station {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  border: 0;
+  border-radius: 0;
+  animation: none;
+}
+.game-viewport {
+  flex: 1;
+  min-height: 0;
+  max-height: none;
+  aspect-ratio: auto;
+}
+.flight-controls,
+.station-statusbar {
+  flex-shrink: 0;
+}
+@media (max-height: 600px) and (min-width: 521px) {
+  .site-header {
+    height: 52px;
+  }
+  .flight-controls {
+    min-height: 76px;
+    padding-top: 8px;
+    padding-bottom: 8px;
+  }
+  .station-statusbar {
+    display: none;
+  }
+  .wind-readout,
+  .takeoff-tip {
+    display: none;
   }
 }

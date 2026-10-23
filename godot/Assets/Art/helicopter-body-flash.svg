@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="870" height="405" viewBox="-190 -80 290 135">
+<defs><linearGradient id="paint" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#fff0c8"/><stop offset=".55" stop-color="#ffe3ac"/><stop offset="1" stop-color="#dcb17b"/></linearGradient><linearGradient id="glass" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#93b9b1"/><stop offset=".45" stop-color="#5e8888"/><stop offset="1" stop-color="#2c5059"/></linearGradient></defs>
+<g stroke-linejoin="round" stroke-linecap="round">
+<!-- Tail boom, fin and stabilizer -->
+<path d="M-47-13-158-30Q-165-30-166-22L-159-17-50 16Z" fill="#db753b" stroke="#a85933" stroke-width="1"/>
+<path d="m-160-20 111 27 1 8-110-32Z" fill="#a65430"/>
+<path d="m-155-23-2-36q0-4 4-4h7l17 46Z" fill="url(#paint)" stroke="#a85933"/>
+<path d="m-153-57 7 0 5 15h-11Z" fill="#eaddba"/>
+<path d="m-158-18-24 7q-2 2 3 2h43l10-8Z" fill="#355451"/>
+<!-- Landing gear -->
+<path d="m-29 20-11 24m81-24 13 24" fill="none" stroke="#29423e" stroke-width="5"/>
+<path d="m-68 41q2 7 9 7H76q12 0 16-9" fill="none" stroke="#b4c3b2" stroke-width="4"/>
+<path d="M-57 46H75" stroke="#e0e3c8" stroke-width="1"/>
+<!-- Fuselage and clean lower sweep -->
+<path d="M-63-3Q-63-24-43-33Q-20-38 26-35Q55-31 75-10Q85 1 81 13Q77 25 64 29H-25Q-51 28-60 13Z" fill="url(#paint)" stroke="#a85a34" stroke-width="1.2"/>
+<path d="M-57 14Q-22 25 31 22L77 16Q73 27 63 29H-25Q-47 28-57 19Z" fill="#b85b33"/>
+<path d="M-53 10H8M18 13H75" stroke="#eddbb6" stroke-width="3"/>
+<!-- Engine cowling and rotor mast -->
+<path d="M-45-32-27-43Q-8-48 18-43L40-33Z" fill="#d88d51" stroke="#ad683c"/>
+<path d="M-27-43Q-20-50-10-49H9Q17-49 22-43Z" fill="#405a53"/>
+<path d="M-22-44h12m-11 3h12" stroke="#233e3d" stroke-width="2"/>
+<path d="M-7-65v19" stroke="#a9bbab" stroke-width="5"/><rect x="-16" y="-69" width="19" height="6" rx="3" fill="#36524c"/>
+<!-- Cockpit with consistent mullions and one reflection -->
+<path d="M15-30Q49-31 68-9Q75-1 75 7H15Z" fill="#233f46"/>
+<path d="M19-27h13L42 4H19Z" fill="url(#glass)"/>
+<path d="M38-26Q55-21 66-7Q70-1 71 4H47Z" fill="url(#glass)"/>
+<path d="m43-23 18 11" stroke="#c9ded0" stroke-width="2" opacity=".55"/>
+<path d="M21 3v-9q5-5 10 0l5 9" fill="#294b50" opacity=".7"/>
+<!-- Open door with rounded frame; the rescuer is a separate sprite -->
+<path d="M-58-27H9" stroke="#e6c694" stroke-width="2"/>
+<rect x="-56" y="-23" width="18" height="43" rx="3" fill="#c86d39" stroke="#ad6137"/>
+<rect x="-53" y="-20" width="12" height="17" rx="2" fill="#3f6464"/>
+<path d="M-47 3v12m-5-6h10" stroke="#f1e3c3" stroke-width="3.5"/>
+<rect x="-34" y="-26" width="43" height="48" rx="4" fill="#152c30" stroke="#e2b47b" stroke-width="2"/>
+<path d="M-29-22V17H5" fill="none" stroke="#2d4543" stroke-width="3"/>
+<path d="M-33 23H8" stroke="#d2cbb0" stroke-width="3"/>
+<!-- Hoist exit remains at the exact simulated mounting point (4,-34). -->
+<rect x="-22" y="-39" width="15" height="8" rx="3" fill="#536e65"/>
+<path d="M-15-35 4-34" stroke="#ced4b9" stroke-width="4"/>
+<circle cx="4" cy="-34" r="4" fill="#29433e" stroke="#d9d6b9" stroke-width="1.5"/>
+<path d="m60-22 8-21" stroke="#53694f" stroke-width="1.5"/>
+</g></svg>

@@ -65,3 +65,7 @@ npx playwright test
 ```
 
 The tests drive a real browser: keyboard and touch input, an automated rescue-and-return flight for each mission, collision damage and failure states, mission switching, dialogs, sound toggling and phone-layout overflow. They are not needed to run or build the game.
+
+## Godot edition
+
+The new GDScript port lives in [`godot/`](godot/README.md) and targets **Godot 4.7.2 stable**. Open `godot/project.godot` in the standard Godot editor and press F5. It includes all three rescue missions, keyboard and on-screen controls, winch rescues, fuel, airframe damage, saved progress and a browser export preset. See the Godot README for controls, verification and export instructions.
