@@ -12,15 +12,16 @@ This build is for direct testing, not a Google Play upload. Each workflow run us
 
 ## What to test
 
-- Start at the base and take off. Hold steering and altitude controls simultaneously.
+- Defaults: altitude hold on, ground tether on, auto-hoist off. Change each independently in Menu → Settings.
+- Start at the base and take off. Move the left joystick diagonally to steer and climb together; try small and full movements.
 - Complete a winch rescue, check the route/tension panel switch, and return to base.
 - Land at the field pad, send the rescuer, help the survivor, and return together.
-- Check the compact footer: WINCH deploys the crew, HOIST retrieves the patient, and CANCEL withdraws the line.
-- Test sound, settings and help. Android Back pauses/resumes the game.
+- Keep one finger on the joystick while another taps the round right-hand winch button. The rescue cross deploys/cancels the winch and handles ground rescues; the up arrow hoists the stretcher. The button mirrors the current loading timer, then shows a green Ready ring when hoisting is available.
+- Open the top-bar menu and check Resume, Settings, Flight manual and Fullscreen. Opening it pauses flight and releases both thumbs. Android Back closes menus or pauses/resumes the game.
 - Switch to another app and back: the game should remain paused until resumed.
 - Report phone model, Android version, the action that failed, and whether the problem is layout, input or frame rate.
 
-Native export removes the browser runtime and browser chrome, but layout and frame-rate quality still need physical-device testing. The display is landscape with immersive mode; native phones use the compact control layout even on high-resolution displays.
+Native export removes the browser runtime and browser chrome, but layout and frame-rate quality still need physical-device testing. The display is landscape with immersive mode; native phones use the translucent joystick and round winch overlays even on high-resolution displays.
 
 ## Build another demo
 

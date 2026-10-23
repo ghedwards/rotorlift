@@ -134,4 +134,3 @@ func _draw() -> void:
 		var text_at := button+Vector2(-width/2,35)
 		draw_string(FONT,text_at+Vector2(0,1),label,HORIZONTAL_ALIGNMENT_LEFT,-1,22,Color(0.02,0.06,0.04,0.7))
 		draw_string(FONT,text_at,label,HORIZONTAL_ALIGNMENT_LEFT,-1,22,tint)
-

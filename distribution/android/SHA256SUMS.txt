@@ -1,1 +1,1 @@
-f36a8c268c7e5d749cac1c3171e0d1787624b301dbc45feac4dc71d12e6d08a6  airlift-demo.apk
+f5796d2c0940fbc04d7c1ad9113ae2849d99df7ea40e6c64e6f4f8b386c4e9b6  airlift-demo.apk
