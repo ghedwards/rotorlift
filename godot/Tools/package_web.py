@@ -24,6 +24,11 @@ for path in project.joinpath('Assets').rglob('*'):
  if path.is_file() and ('LICENSE' in path.name or 'COPYRIGHT' in path.name):
   shutil.copy2(path,licenses/path.name)
 (output/'build-info.json').write_text(json.dumps({'engine':'Godot 4.7.2','threaded':False,'orientation':'landscape','controls':'WASD / arrows, Space; touch controls'},indent=2)+'\n')
+
+# Publish static support/privacy pages beside the game.
+for section in ['privacy','support']:
+ page=project.parent/'distribution'/section
+ if page.exists():shutil.copytree(page,output/section)
 archive=output.with_suffix('.zip')
 with zipfile.ZipFile(archive,'w',zipfile.ZIP_DEFLATED,compresslevel=9) as bundle:
  for path in sorted(output.rglob('*')):
@@ -46,4 +51,5 @@ if android_source.exists():
  for token,value in {'SIZE':f"{metadata['bytes']/1000000:.1f}",'VERSION':metadata['version'],'SHA':metadata['sha256']}.items():
   page=page.replace('@@'+token+'@@',html.escape(value))
  (download/'index.html').write_text(page)
+ shutil.copy2(project/'Assets/Art/app-icon.svg',download/'app-icon.svg')
  print(f"Android download: {download} ({metadata['version']})")

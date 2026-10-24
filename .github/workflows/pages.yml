@@ -1,4 +1,4 @@
-name: Publish AIRLIFT
+name: Publish Rotorlift
 on:
   workflow_dispatch:
   push:

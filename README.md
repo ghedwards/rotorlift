@@ -1,4 +1,4 @@
-# AIRLIFT — Search & Rescue
+# Rotorlift — Search & Rescue
 
 A Godot 4.7.2 / GDScript helicopter rescue game with three extended missions, momentum flight, wind, timed winch rescues and playable ground rescues.
 
@@ -14,7 +14,7 @@ Import `godot/project.godot` into **Godot 4.7.2 standard** and press F5. No .NET
 
 ## Publish updates
 
-The [Pages workflow](.github/workflows/pages.yml) builds and tests the Godot game on pushes to `main`, or through **Actions → Publish AIRLIFT → Run workflow**. It pins the engine version, verifies release checksums, exports without threading, bundles license notices and deploys only the web files. See [sharing and deployment](godot/SHARING.md).
+The [Pages workflow](.github/workflows/pages.yml) builds and tests the Godot game on pushes to `main`, or through **Actions → Publish Rotorlift → Run workflow**. It pins the engine version, verifies release checksums, exports without threading, bundles license notices and deploys only the web files. See [sharing and deployment](godot/SHARING.md).
 
 ## Artwork and animation
 
@@ -23,3 +23,5 @@ Static artwork and animated character atlases are editable SVGs in `godot/Assets
 The earlier React/Canvas prototype remains in `src/` and `airlift.html`; its [original instructions](docs/html-prototype.md) are retained for reference. The Pages workflow deploys the Godot edition.
 
 Native Android demo: [download and installation](https://ghedwards.github.io/rotorlift/download/).
+
+Store descriptions, screenshots and beta review notes: [store listing kit](docs/store-listing.md).

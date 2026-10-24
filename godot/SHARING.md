@@ -1,4 +1,4 @@
-# Sharing AIRLIFT
+# Sharing Rotorlift
 
 ## First release: one browser link
 
@@ -9,7 +9,7 @@ The export uses the Compatibility renderer and **single-threaded** WebAssembly. 
 ### GitHub Pages setup
 
 1. In repository **Settings → Pages**, select **GitHub Actions** as the source.
-2. Push the game and `.github/workflows/pages.yml` to `main` (or run **Publish AIRLIFT** manually).
+2. Push the game and `.github/workflows/pages.yml` to `main` (or run **Publish Rotorlift** manually).
 3. Wait for both `build` and `deploy` to succeed, then open the workflow's deployed URL.
 
 The workflow downloads the official Godot 4.7.2 editor and export templates, verifies their SHA-512 checksums, runs scene/rescue/animation/all-mission checks and exports the browser build. It uploads only `godot/builds/site`, not the repository or development cache. The public repository's main branch is the release source; future game changes pushed there will publish automatically after passing checks.
@@ -50,3 +50,18 @@ References:
 - https://docs.godotengine.org/en/stable/tutorials/export/exporting_for_web.html
 - https://docs.github.com/en/pages/getting-started-with-github-pages/using-custom-workflows-with-github-pages
 - https://itch.io/docs/creators/html5
+
+## Custom domain: rotorlift.edification.dev
+
+The current live address remains https://ghedwards.github.io/rotorlift/ until the DNS/domain setup is complete.
+
+When ready to switch:
+
+1. In GitHub repository **Settings → Pages → Custom domain**, set `rotorlift.edification.dev`.
+2. At the DNS provider for `edification.dev`, add a **CNAME** record named `rotorlift` with target `ghedwards.github.io` (no repository path).
+3. Wait for GitHub's DNS check/certificate provisioning, then enable **Enforce HTTPS**.
+4. Check both `/` (browser game) and `/download/` (Android demo), including downloading the APK. Update shared links after both work over HTTPS.
+
+For this GitHub Actions deployment, a CNAME file in the published artifact is not required; GitHub's Pages settings control the custom domain. Browser progress is stored per origin, so progress at the github.io address does not transfer automatically to the new domain.
+
+Reference: https://docs.github.com/en/pages/configuring-a-custom-domain-for-your-github-pages-site/managing-a-custom-domain-for-your-github-pages-site
